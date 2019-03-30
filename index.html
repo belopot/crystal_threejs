@@ -1,51 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webgl - materials - shaders [lava]</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				color: #ffffff;
-				font-family:Monospace;
-				font-size:13px;
-				text-align:center;
-				font-weight: bold;
-				background-color: #000000;
-				margin: 0px;
-				overflow: hidden;
-			}
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-			}
-			a { color: #ffffff; }
-			#webglmessage a { color:#da0 }
-		</style>
-	</head>
-	<body>
 
-		<div id="container"></div>
-		<script src="lib/three.js"></script>
+<head>
+	<title>three.js webgl - materials - shaders [lava]</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			color: #ffffff;
+			font-family: Monospace;
+			font-size: 13px;
+			text-align: center;
+			font-weight: bold;
+			background-color: #000000;
+			margin: 0px;
+			overflow: hidden;
+		}
 
-		<script src="lib/shaders/ConvolutionShader.js"></script>
-		<script src="lib/shaders/CopyShader.js"></script>
-		<script src="lib/shaders/FilmShader.js"></script>
+		#info {
+			position: absolute;
+			top: 0px;
+			width: 100%;
+			padding: 5px;
+		}
 
-		<script src="lib/postprocessing/EffectComposer.js"></script>
-		<script src="lib/postprocessing/ShaderPass.js"></script>
-		<script src="lib/postprocessing/MaskPass.js"></script>
-		<script src="lib/postprocessing/RenderPass.js"></script>
-		<script src="lib/postprocessing/BloomPass.js"></script>
-        <script src="lib/postprocessing/FilmPass.js"></script>
-        
-        <script src="lib/loaders/MTLLoader.js"></script>
-        <script src="lib/loaders/OBJLoader.js"></script>
+		a {
+			color: #ffffff;
+		}
 
-		<script src="lib/WebGL.js"></script>
+		#webglmessage a {
+			color: #da0
+		}
+	</style>
+</head>
 
-		<script id="fragmentShader" type="x-shader/x-fragment">
+<body>
+
+	<div id="container"></div>
+	<script src="lib/three.js"></script>
+
+	<script src="lib/shaders/ConvolutionShader.js"></script>
+	<script src="lib/shaders/CopyShader.js"></script>
+	<script src="lib/shaders/FilmShader.js"></script>
+	<script src="lib/shaders/FXAAShader.js"></script>
+
+
+	<script src="lib/postprocessing/EffectComposer.js"></script>
+	<script src="lib/postprocessing/ShaderPass.js"></script>
+	<script src="lib/postprocessing/MaskPass.js"></script>
+	<script src="lib/postprocessing/RenderPass.js"></script>
+	<script src="lib/postprocessing/BloomPass.js"></script>
+	<script src="lib/postprocessing/FilmPass.js"></script>
+
+	<script src="lib/loaders/RGBELoader.js"></script>
+	<script src="lib/loaders/MTLLoader.js"></script>
+	<script src="lib/loaders/OBJLoader.js"></script>
+	<script src="lib/loaders/HDRCubeTextureLoader.js"></script>
+
+	<script src="lib/pmrem/PMREMGenerator.js"></script>
+	<script src="lib/pmrem/PMREMCubeUVPacker.js"></script>
+
+	<script src="lib/controls/OrbitControls.js"></script>
+
+	<script src="lib/dat.gui.min.js"></script>
+
+	<script src="lib/WebGL.js"></script>
+
+	<script id="fragmentShader" type="x-shader/x-fragment">
 			uniform float time;
 			uniform float fogDensity;
 			uniform vec3 fogColor;
@@ -76,7 +97,7 @@
 			}
 		</script>
 
-		<script id="vertexShader" type="x-shader/x-vertex">
+	<script id="vertexShader" type="x-shader/x-vertex">
 			uniform vec2 uvScale;
 			varying vec2 vUv;
 			void main()
@@ -87,7 +108,8 @@
 			}
 		</script>
 
-		
-        <script src="js/main.js"></script>
-	</body>
+
+	<script src="js/main.js"></script>
+</body>
+
 </html>
