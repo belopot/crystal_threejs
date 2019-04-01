@@ -1,3 +1,42 @@
-.a{
+.a {
     color: #444444;
+}
+
+.bg-gradient {
+    background-color: #0015ff;
+    background-image: -webkit-gradient(to right, #0073ff, #0034ff, #0015ff, #0034ff, #0073ff);
+    /* Safari 5.1, iOS 5.0-6.1, Chrome 10-25, Android 4.0-4.3 */
+    background-image: -webkit-linear-gradient(to right, #0073ff, #0034ff, #0015ff, #0034ff, #0073ff);
+    /* Firefox 3.6 - 15 */
+    background-image: -moz-linear-gradient(to right, #0073ff, #0034ff, #0015ff, #0034ff, #0073ff);
+    /* Opera 11.1 - 12 */
+    background-image: -o-linear-gradient(to right, #0073ff, #0034ff, #0015ff, #0034ff, #0073ff);
+    /* Opera 15+, Chrome 25+, IE 10+, Firefox 16+, Safari 6.1+, iOS 7+, Android 4.4+ */
+    background-image: linear-gradient(to right, #0073ff, #0034ff, #0015ff, #0034ff, #0073ff);
+}
+
+body {
+    color: #ffffff;
+    font-family: Monospace;
+    font-size: 13px;
+    text-align: center;
+    font-weight: bold;
+    background-color: #000000;
+    margin: 0px;
+    overflow: hidden;
+}
+
+#info {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    padding: 5px;
+}
+
+a {
+    color: #ffffff;
+}
+
+#webglmessage a {
+    color: #da0
 }

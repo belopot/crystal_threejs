@@ -2,41 +2,15 @@
 <html lang="en">
 
 <head>
-	<title>three.js webgl - materials - shaders [lava]</title>
+	<title>Office Shimura</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<style>
-		body {
-			color: #ffffff;
-			font-family: Monospace;
-			font-size: 13px;
-			text-align: center;
-			font-weight: bold;
-			background-color: #000000;
-			margin: 0px;
-			overflow: hidden;
-		}
-
-		#info {
-			position: absolute;
-			top: 0px;
-			width: 100%;
-			padding: 5px;
-		}
-
-		a {
-			color: #ffffff;
-		}
-
-		#webglmessage a {
-			color: #da0
-		}
-	</style>
+	<link rel="stylesheet", href="css/index.css">
 </head>
 
 <body>
 
-	<div id="container"></div>
+	<div id="container" class="bg-gradient"></div>
 	<script src="lib/three.js"></script>
 
 	<script src="lib/shaders/ConvolutionShader.js"></script>
@@ -65,6 +39,9 @@
 	<script src="lib/dat.gui.min.js"></script>
 
 	<script src="lib/WebGL.js"></script>
+
+	<script src="lib/TweenMax.min.js"></script>
+
 
 	<script id="fragmentShader" type="x-shader/x-fragment">
 			uniform float time;
