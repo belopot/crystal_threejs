@@ -1,8 +1,5 @@
-if (WEBGL.isWebGLAvailable() === false) {
-    document.body.appendChild(WEBGL.getWebGLErrorMessage());
-}
 var container;
-var camera, scene, renderer, composer, clock;
+var camera, cameraRoot, scene, renderer, composer, clock;
 var crystalMaterial, markerMaterial;
 var hdrCubeRenderTarget;
 var logoCrystal;
@@ -10,12 +7,12 @@ var partialCrystals = [];
 var partialCrystalRoots = [];
 var partialCrystalRootAngleSpeeds = [];
 var partialCrystalAngleSpeeds = [];
-var radiusPartialCrystals = [];
 var initPositionOfPartialCrystals = [];
+var initScaleOfPartialCrystals = [];
 var originPartCrystalPos = [];
-var partialCrystalParent;
-var partialCrystalParentParent;
-var partialCrystalCount = 120;
+var crystalParent;
+var partialCrystalCount = 110;
+
 
 //Camera Animation
 var targetRotationX = 0;
@@ -24,18 +21,19 @@ var targetRotationXOnMouseDown = 0;
 var targetRotationYOnMouseDown = 0;
 var mouseX = 0;
 var mouseY = 0;
-var oldMouseX = 0;
-var oldMouseY = 0;
 var mouseXOnMouseDown = 0;
 var mouseYOnMouseDown = 0;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 var isMouseDown = false;
-var animTimer = 0;
+var oldDownPosX = 0;
+var oldDownPosY = 0;
+var firstDown = true;
 
 
 //Gather mesh
-var mouseDownTimer = 0;
+var downTimer = 0;
+var gatherTimer = 0;
 
 var State = {
     Laround: 1,
@@ -43,28 +41,21 @@ var State = {
     Saround: 3,
     Sgather: 4,
     Logo: 5,
+    End: 6,
     times: {
         1: { value: 0 },
-        2: { value: 15 },
-        3: { value: 2 },
-        4: { value: 1 },
-        5: { value: 0 },
+        2: { value: 13.0 },
+        3: { value: 6.6 },
+        4: { value: 5 },
+        5: { value: 5 },
+        6: { value: 0 },
     }
 };
 
 var currentState = State.Laround;
 
-var getRandom = function (max) {
-    var min = -max;
-    var rand = Math.random();
-    var _max = 2 * max;
-    var val = rand * _max;
-    val = val + min;
-    return val;
-};
-
 function getRandomScale(low, high) {
-    return Math.random() * (high - low) + low
+    return getRandom() * (high - low) + low
 };
 
 function distanceVector(v1, v2) {
@@ -74,6 +65,10 @@ function distanceVector(v1, v2) {
 
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
 };
+
+function getRandom() {
+    return (Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) / 5
+}
 
 
 init();
@@ -103,38 +98,22 @@ function init() {
     //Camera
     //////////////////////////////////////////////////////////////////////////////////////////////
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 3000);
-    camera.position.z = 155;
+    camera.position.z = 135;
     camera.position.y = -2;
     camera.lookAt(new THREE.Vector3(0, 0, 0));
-    scene.add(camera);
+    cameraRoot = new THREE.Object3D();
+    cameraRoot.add(camera);
+    scene.add(cameraRoot);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     //Light
     //////////////////////////////////////////////////////////////////////////////////////////////
-    var intensity = 1000.5;
-    ambientLight = new THREE.AmbientLight(0x444444);
+    ambientLight = new THREE.AmbientLight(0x0000ff);
+    ambientLight.intensity = 100;
     scene.add(ambientLight);
     directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.position.set(1, 30, -1);
     scene.add(directionalLight);
-
-    var pointLight1 = new THREE.PointLight(0x0000ff);
-    pointLight1.position.set(30, 10, 0);
-    pointLight1.intensity = intensity;
-    pointLight1.castShadow = false;
-    scene.add(pointLight1);
-    var pointLight2 = new THREE.PointLight(0x0000ff);
-    pointLight2.position.set(-30, 0, 0);
-    pointLight2.intensity = intensity;
-    scene.add(pointLight2);
-    var pointLight3 = new THREE.PointLight(0x0000ff);
-    pointLight3.position.set(0, -10, -30);
-    pointLight3.intensity = intensity;
-    scene.add(pointLight3);
-    var pointLight4 = new THREE.PointLight(0x0000ff);
-    pointLight4.position.set(0, 0, 40);
-    pointLight4.intensity = intensity;
-    scene.add(pointLight4);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Clock
@@ -144,15 +123,15 @@ function init() {
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Effects
     /////////////////////////////////////////////////////////////////////////////////////////////
-    var renderModel = new THREE.RenderPass(scene, camera);
-    var effectBloom = new THREE.BloomPass(1.4);
-    var effectFilm = new THREE.FilmPass(0.1, 0.1, 2048, false);
-    effectFilm.renderToScreen = true;
+    // var renderModel = new THREE.RenderPass(scene, camera);
+    // var effectBloom = new THREE.BloomPass(1.4);
+    // var effectFilm = new THREE.FilmPass(0.1, 0.1, 2048, false);
+    // effectFilm.renderToScreen = true;
 
-    composer = new THREE.EffectComposer(renderer);
-    composer.addPass(renderModel);
-    composer.addPass(effectBloom);
-    composer.addPass(effectFilm);
+    // composer = new THREE.EffectComposer(renderer);
+    // composer.addPass(renderModel);
+    // composer.addPass(effectBloom);
+    // composer.addPass(effectFilm);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Import model
@@ -188,24 +167,23 @@ function init() {
     //Crystal Material
     crystalMaterial = new THREE.MeshPhysicalMaterial({
         // color: 0x0000ff,
-        emissive: 0x000011,
+        // emissive: 0x000011,
         roughness: 0.005,
-        metalness: 1,
-        reflectivity: 30.4,
-        refractionRatio: 7.9,
+        metalness: 0.8,
+        reflectivity: 0.5,
         opacity: 1,
         side: THREE.DoubleSide,
         transparent: true,
         mapping: THREE.CubeRefractionMapping,
-        // envMapIntensity: 1.5,
-        // envMaps: textureLoader.load("Assets/texture/env.jpg"),
+        envMapIntensity: 3.3,
+        envMaps: textureLoader.load("Assets/texture/env.jpg"),
         premultipliedAlpha: true,
         map: textureLoader.load("Assets/texture/diffuse.png"),
         alphaMap: textureLoader.load("Assets/texture/opacity.png"),
         specularMap: textureLoader.load("Assets/texture/glossiness.png"),
         lightMap: textureLoader.load("Assets/texture/glossiness.png"),
         normalMap: textureLoader.load("Assets/texture/normal.png"),
-        normalScale: new THREE.Vector2(2.7, 2.7),
+        normalScale: new THREE.Vector2(1.7, 1.7),
     });
 
     //Logo Material
@@ -274,36 +252,23 @@ function init() {
     });
 
     //Logo Model
-    var logoModelSize = 0.1;
     new THREE.OBJLoader(manager).setPath('Assets/model/').load('logo.obj', function (object) {
         logoCrystal = object;
         object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-                var isMarker = child.name.includes("photo");
-                child.material = isMarker ? markerMaterial : crystalMaterial;
-                child.scale.set(logoModelSize, logoModelSize, logoModelSize);
-                // if(isMarker)
-                //     child.position.set(0,0,0);
+                child.material = crystalMaterial;
+                child.scale.set(0.15, 0.15, 0.15);
             }
         });
-        // scene.add(object);
-        //Set animation
-        // TweenMax.from(logoCrystal.rotation, 5, {x:40})
-        // TweenMax.to(logoCrystal.scale, 5, { x: 1, y: 1, z: 1, x: 2, y: 2, z: 2, ease: Power2.easeInOut });
+        logoCrystal.visible = false;
+        logoCrystal.scale.set(0.3, 0.3, 0.3);
+        crystalParent.add(logoCrystal);
     });
 
-
-
-    //Central Model
-    partialCrystalParent = new THREE.Mesh(new THREE.SphereGeometry(0.001), new THREE.MeshPhysicalMaterial({
-        opacity: 0,
-        transparent: true,
-    }));
-    scene.add(partialCrystalParent);
-
     //Partial Model
-    let largeCrystalSize = 0.4;
-    let smallsCrystalSize = 0.8;
+    crystalParent = new THREE.Object3D()
+    let largeCrystalSize = 0.3;
+    let smallsCrystalSize = 0.7;
     let partialCrystalIdx = [];
     let largeCrystalPercent = 0.4;
     let largeCrystalEndIdx = Math.floor(partialCrystalCount * largeCrystalPercent);
@@ -316,26 +281,26 @@ function init() {
     for (let i = 0; i < partialCrystalCount; i++) {
         new THREE.OBJLoader(manager).setPath('Assets/model/').load(partialCrystalIdx[i] + '.obj', function (object) {
             //Random point within sphere uniformly
-            let alpha = 2 * Math.PI * Math.random();
-            let ua = getRandomScale(-1, 1) + getRandomScale(-1, 1);
-            let ra = Math.abs(ua) < 0.8 ? 2 - Math.abs(ua) : ua;
+            let symbolX = getRandomScale(-1, 1);
+            symbolX = symbolX >= 0 ? 1 : -1;
+            let symbolY = getRandomScale(-1, 1);
+            symbolY = symbolY >= 0 ? 1 : -1;
 
-            let rx = ra * Math.cos(alpha);
-            rx = rx * 60;
-            let ry = ra * Math.sin(alpha);
-            ry = ry * 60;
+            let alpha = 2 * Math.PI * getRandom();
+            let beta = getRandomScale(-2 * Math.PI, 2 * Math.PI);
 
-            let beta = 2 * Math.PI * Math.random();
-            let ub = getRandomScale(-1, 1) + getRandomScale(-1, 1);
-            let rb = Math.abs(ub) < 0.8 ? 2 - Math.abs(ub) : ub;
-            let rz = rb * Math.sin(beta);
-            rz = rz * 60;
+            let ua = getRandomScale(50, 120);
+
+            let rx = symbolX * ua * Math.cos(alpha);
+            let ry = symbolY * ua * Math.sin(alpha);
+            let rz = 0;
             let partialCrystal = object;
+
             partialCrystal.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
                     let isMarker = child.name.includes("photo");
                     child.material = isMarker ? markerMaterial : crystalMaterial;
-                    if(isMarker){
+                    if (isMarker) {
                         child.visible = false;
                     }
                 }
@@ -344,10 +309,7 @@ function init() {
             scene.add(partialCrystal);
             partialCrystal.position.set(rx, ry, rz);
             partialCrystal.scale.set(i < largeCrystalEndIdx ? largeCrystalSize : smallsCrystalSize, i < largeCrystalEndIdx ? largeCrystalSize : smallsCrystalSize, i < largeCrystalEndIdx ? largeCrystalSize : smallsCrystalSize);
-            let pos = new THREE.Vector3(rx, ry, rz);
-            initPositionOfPartialCrystals.push(pos);
-            let r = distanceVector(new THREE.Vector3(0, 0, 0), pos);
-            radiusPartialCrystals.push(r);
+
             partialCrystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
 
             partialCrystals.push(partialCrystal);
@@ -356,19 +318,29 @@ function init() {
             scene.add(partialCrystalRoot);
             partialCrystalRoot.add(partialCrystal);
             partialCrystalRoot.position.set(0, 0, 0);
-            partialCrystalParent.add(partialCrystalRoot);
+            partialCrystalRoot.rotation.set(0, beta, 0);
             partialCrystalRoots.push(partialCrystalRoot);
 
-            partialCrystalParentParent = new THREE.Object3D()
-            scene.add(partialCrystalParentParent);
-            partialCrystalParentParent.add(partialCrystalParent);
+            crystalParent.add(partialCrystalRoot);
+            scene.add(crystalParent);
+
+            partialCrystalRoot.updateMatrixWorld();
+            let p = new THREE.Vector3();
+            partialCrystal.getWorldPosition(p);
+            initPositionOfPartialCrystals.push(p);
+
+            let s = new THREE.Vector3();
+            s.x = partialCrystal.scale.x;
+            s.y = partialCrystal.scale.y;
+            s.z = partialCrystal.scale.z;
+            initScaleOfPartialCrystals.push(s);
 
             //Rotate World Space
-            let partialCrystalRootAngleSpeed = new THREE.Vector3(getRandomScale(-1, 1) * r / 70000, getRandomScale(-1, 1) * r / 70000, getRandomScale(-1, 1) * r / 70000);
+            let partialCrystalRootAngleSpeed = new THREE.Vector3(getRandomScale(- 2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI));
             partialCrystalRootAngleSpeeds.push(partialCrystalRootAngleSpeed);
 
             //Rotate Local Space
-            let partialCrystalAngleSpeed = new THREE.Vector3(getRandomScale(-1, 1) / 200, getRandomScale(-1, 1) / 200, getRandomScale(-1, 1) / 200);
+            let partialCrystalAngleSpeed = new THREE.Vector3(getRandomScale(- 2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI));
             partialCrystalAngleSpeeds.push(partialCrystalAngleSpeed);
         });
     }
@@ -394,46 +366,81 @@ function init() {
 
 function onDocumentMouseDown(event) {
     isMouseDown = true;
-    targetRotationX = partialCrystalParent.rotation.y;
+    targetRotationX = cameraRoot.rotation.y;
     event.preventDefault();
     mouseXOnMouseDown = event.clientX - windowHalfX;
     targetRotationXOnMouseDown = targetRotationX;
-
     mouseYOnMouseDown = event.clientY - windowHalfY;
     targetRotationYOnMouseDown = targetRotationY;
-}
-function onDocumentMouseMove(event) {
-    mouseX = event.clientX - windowHalfX;
-    targetRotationX = targetRotationXOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
 
-    mouseY = event.clientY - windowHalfY;
-    targetRotationY = targetRotationYOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
-
-    //Animation for mouse hover
-    if (partialCrystalParentParent) {
-        if ((mouseX * 1 / windowHalfX) >= 0) {
-            partialCrystalParentParent.rotation.y = (-(mouseX * 1 / windowHalfX) + 1) * 0.1;
-            partialCrystalParentParent.rotation.x = (-(mouseY * 1 / windowHalfY) + 1) * 0.1;
-        }
-        else {
-            partialCrystalParentParent.rotation.y = (2 + (-(mouseX * 1 / windowHalfX) - 1)) * 0.1;
-            partialCrystalParentParent.rotation.x = (2 + (-(mouseY * 1 / windowHalfY) - 1)) * 0.1;
-        }
-    }
-
+    oldDownPosX = event.clientX;
+    oldDownPosY = event.clientY;
 }
 function onDocumentMouseUp() {
     isMouseDown = false;
 }
-function onDocumentMouseOut() {
-    isMouseDown = false;
+function onDocumentMouseMove(event) {
+    mouseX = event.clientX - windowHalfX;
+    targetRotationX = targetRotationXOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
+    mouseY = event.clientY - windowHalfY;
+    targetRotationY = targetRotationYOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
+    //Animation for mouse hover
+
+    if (crystalParent) {
+
+        if (isMouseDown) {
+            let y = (event.clientX - oldDownPosX) * 0.1;
+            oldDownPosX = event.clientX;
+
+            TweenMax.killTweensOf(crystalParent);
+            TweenMax.to(crystalParent.rotation, 3, {
+                ease: Expo.easeOut,
+                y: crystalParent.rotation.y + y,
+                onUpdate: function (t) {
+
+                }
+            })
+        }
+        else {
+            //Hover
+            let x = 0;
+            let y = 0;
+            if ((mouseX * 1 / windowHalfX) >= 0) {
+                x = (-mouseY / windowHalfY + 1) * 0.2;
+                y = (-mouseX / windowHalfX + 1) * 0.2;
+            }
+            else {
+                x = (2 + (-mouseY / windowHalfY) - 1) * 0.2;
+                y = (2 + (-mouseX / windowHalfX) - 1) * 0.2;
+            }
+
+            TweenMax.killTweensOf(cameraRoot);
+            TweenMax.to(cameraRoot.rotation, 2, {
+                ease: Expo.easeOut,
+                x: x,
+                y: y,
+                onUpdate: function (t) {
+
+                }
+            })
+
+        }
+
+    }
+
 }
 function onDocumentTouchStart(event) {
     isMouseDown = true;
+    targetRotationX = cameraRoot.rotation.y;
     if (event.touches.length == 1) {
         event.preventDefault();
         mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
         targetRotationXOnMouseDown = targetRotationX;
+        mouseYOnMouseDown = event.touches[0].pageY - windowHalfY;
+        targetRotationYOnMouseDown = targetRotationY;
+
+        oldDownPosX = event.touches[0].pageX;
+        oldDownPosY = event.touches[0].pageY;
     }
 }
 function onDocumentTouchEnd(event) {
@@ -444,9 +451,51 @@ function onDocumentTouchMove(event) {
         event.preventDefault();
         mouseX = event.touches[0].pageX - windowHalfX;
         targetRotationX = targetRotationXOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
-
-        mouseY = event.clientY - windowHalfY;
+        mouseY = event.touches[0].pageY - windowHalfY;
         targetRotationY = targetRotationYOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
+        //Animation for mouse hover
+
+        if (crystalParent) {
+
+            if (isMouseDown) {
+                let y = (event.touches[0].pageX - oldDownPosX) * 0.1;
+                oldDownPosX = event.touches[0].pageX;
+
+                TweenMax.killTweensOf(crystalParent);
+                TweenMax.to(crystalParent.rotation, 3, {
+                    ease: Expo.easeOut,
+                    y: crystalParent.rotation.y + y,
+                    onUpdate: function (t) {
+
+                    }
+                })
+            }
+            else {
+                //Hover
+                let x = 0;
+                let y = 0;
+                if ((mouseX * 1 / windowHalfX) >= 0) {
+                    x = (-mouseY / windowHalfY + 1) * 0.2;
+                    y = (-mouseX / windowHalfX + 1) * 0.2;
+                }
+                else {
+                    x = (2 + (-mouseY / windowHalfY) - 1) * 0.2;
+                    y = (2 + (-mouseX / windowHalfX) - 1) * 0.2;
+                }
+
+                TweenMax.killTweensOf(cameraRoot);
+                TweenMax.to(cameraRoot.rotation, 2, {
+                    ease: Expo.easeOut,
+                    x: x,
+                    y: y,
+                    onUpdate: function (t) {
+
+                    }
+                })
+
+            }
+
+        }
     }
 }
 
@@ -455,7 +504,7 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    composer.reset();
+    // composer.reset();
 }
 
 function animate() {
@@ -466,127 +515,201 @@ function animate() {
 function render() {
 
     var delta = 5 * clock.getDelta();
-    animTimer += delta;
 
+    //Logo Crystal Animation
+    if(logoCrystal && currentState == State.End){
+        logoCrystal.rotation.y += 0.05 * delta;
+    }
 
-    //Initial Animation
-    if (partialCrystalParent) {
-        //Animation for mouse down
-        if (isMouseDown) {
-            partialCrystalParent.rotation.y += (targetRotationX - partialCrystalParent.rotation.y) * 0.008;
+    //Partial Crystal Animation
+    for (let i = 0; i < partialCrystalCount; i++) {
+        //Rotate local space
+        if (partialCrystals[i]) {
+            partialCrystals[i].rotation.x += partialCrystalAngleSpeeds[i].x / 240;
+            partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].y / 240;
+            partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].z / 240;
         }
 
-        // partialCrystalParent.rotation.y += 0.003 * delta;
-        for (let i = 0; i < partialCrystalCount; i++) {
-            //Rotate local space
-            if (partialCrystals[i]) {
-                partialCrystals[i].rotation.x += partialCrystalAngleSpeeds[i].x;
-                partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].y;
-                partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].z;
+        //Rotate world space
+        if (partialCrystalRoots[i]) {
+            if (currentState == State.Laround) {
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2200;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2200;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2200;
             }
-
-            //Rotate world space
-            if (partialCrystalRoots[i]) {
-                let r = distanceVector(partialCrystals[i].position, new THREE.Vector3(0,0,0));
-                let v = -(49 / 45) * r + 199 / 3;
-                if(r >= 60){
-                   v += 199 / 3;
+            if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo) {
+                let a = Math.exp(gatherTimer * 0.08) * 0.003;
+                if (a > 0.017) {
+                    a = 0.02;
                 }
-                // console.log(r)
-                if(currentState == State.Laround){
-                    partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x;
-                    partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y;
-                    partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z;
-                }
-                else if(currentState == State.Lgather){
-                    partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x * (1+mouseDownTimer) * 1.5;
-                    partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y * (1+mouseDownTimer) * 1.5;
-                    partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z * (1+mouseDownTimer) * 1.5;
-                }
-                else if(currentState == State.Saround){
-                    partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x * 45;
-                    partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y * 45;
-                    partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z * 45;
-                }
-
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2200 + a;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2200 + a;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2200 + a;
             }
         }
-
     }
 
     switch (currentState) {
         case State.Laround:
             //Animation by mouse
             if (isMouseDown) {
-                mouseDownTimer += delta;
-                if (mouseDownTimer > State.times[currentState].value) {
+                downTimer += delta;
+                if (downTimer > State.times[currentState].value) {
                     currentState = State.Lgather;
-                    mouseDownTimer = 0;
-
                     //Anim Lgather
+                    let idx = 0;
                     partialCrystals.forEach(partCrystal => {
-                        
-                        let alpha = 2 * Math.PI * Math.random();
-                        let ua = getRandomScale(-1, 1) + getRandomScale(-1, 1);
-                        let ra = Math.abs(ua) < 0.8 ? 2 - Math.abs(ua) : ua;
+                        //Random point within sphere uniformly
+                        let rx = initPositionOfPartialCrystals[idx].x * 0.4;
+                        let ry = initPositionOfPartialCrystals[idx].y * 0.4;
+                        let rz = initPositionOfPartialCrystals[idx].z * 0.4;
+                        let sx = initScaleOfPartialCrystals[idx].x * 0.8;
+                        let sy = initScaleOfPartialCrystals[idx].y * 0.8;
+                        let sz = initScaleOfPartialCrystals[idx].z * 0.8;
+                        TweenMax.killTweensOf(partCrystal);
+                        TweenMax.to(partCrystal.position, 2.5, {
+                            ease: Sine.easeInOut,
+                            x: rx,
+                            y: ry,
+                            z: rz,
+                            onComplete() {
+                                // currentState = State.Saround;
+                            },
+                            onUpdate() {
 
-                        let rx = ra * Math.cos(alpha);
-                        rx = rx * 16;
-                        let ry = ra * Math.sin(alpha);
-                        ry = ry * 16;
+                            }
+                        });
+                        TweenMax.to(partCrystal.scale, 2.5, {
+                            ease: Sine.easeInOut,
+                            x: sx,
+                            y: sy,
+                            z: sz,
+                            onComplete() {
+                                // currentState = State.Saround;
+                            },
+                            onUpdate() {
 
-                        let beta = 4.6 * Math.PI * Math.random();
-                        let ub = getRandomScale(-1, 1) + getRandomScale(-1, 1);
-                        let rb = Math.abs(ub) < 0.8 ? 2 - Math.abs(ub) : ub;
-                        let rz = rb * Math.sin(beta);
-                        rz = rz * 16;
-
-                        TweenMax.to(partCrystal.position, 3, { x: rx, y: ry, z: rz, ease: Power3.easeIn });
+                            }
+                        });
+                        idx++;
                     });
                 }
 
             }
             else {
-                mouseDownTimer = 0;
+                downTimer -= delta;
+                if (downTimer < 0)
+                    downTimer = 0;
             }
             break;
 
         case State.Lgather:
             if (isMouseDown) {
-                mouseDownTimer += delta;
-                console.log(mouseDownTimer)
-                if (mouseDownTimer > State.times[currentState].value) {
+                downTimer += delta;
+                gatherTimer += delta;
+                if (downTimer > State.times[currentState].value) {
                     currentState = State.Saround;
-                    mouseDownTimer = 0;
+                    downTimer = 0;
                 }
             }
             else {
+                //Return origin position
                 currentState = State.Laround;
-                //Anim Laround
+                downTimer = 0;
+                gatherTimer = 0;
                 let idx = 0;
                 partialCrystals.forEach(partCrystal => {
-                    let pos = initPositionOfPartialCrystals[idx++];
-                    TweenMax.to(partCrystal.position, 2.5, { x: pos.x, y: pos.y, z: pos.z, ease: Power2.easeOut });
+                    TweenMax.killTweensOf(partCrystal);
+                    TweenMax.to(partCrystal.position, 2.5, {
+                        x: initPositionOfPartialCrystals[idx].x,
+                        y: initPositionOfPartialCrystals[idx].y,
+                        z: initPositionOfPartialCrystals[idx].z,
+                        ease: Expo.easeOut
+                    });
+                    TweenMax.to(partCrystal.scale, 2.5, {
+                        ease: Sine.easeInOut,
+                        x: initScaleOfPartialCrystals[idx].x,
+                        y: initScaleOfPartialCrystals[idx].y,
+                        z: initScaleOfPartialCrystals[idx].z,
+                        onComplete() {
+                            // currentState = State.Saround;
+                        },
+                        onUpdate() {
+
+                        }
+                    });
+                    idx++;
                 });
             }
             break;
         case State.Saround:
+            downTimer += delta;
+            gatherTimer += delta;
+            if (downTimer > State.times[currentState].value) {
+                currentState = State.Sgather;
+                downTimer = 0;
+            }
             break;
         case State.Sgather:
+            downTimer += delta;
+            gatherTimer += delta;
+            if (downTimer > State.times[currentState].value) {
+                currentState = State.Logo;
+                downTimer = 0;
+                //Anim Sgather
+                partialCrystals.forEach(partCrystal => {
+                    //Random point within sphere uniformly
+                    TweenMax.killTweensOf(partCrystal);
+                    TweenMax.to(partCrystal.position, 2, {
+                        ease: Expo.easeOut,
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                        onComplete() {
+                        },
+                        onUpdate() {
+                        }
+                    });
+                });
+            }
             break;
         case State.Logo:
+            //Hide partialCrystals
+            downTimer += delta;
+            gatherTimer += delta;
+            if (downTimer > State.times[currentState].value) {
+                //Logo
+                currentState = State.End;
+                downTimer = 0;
+
+                logoCrystal.visible = true;
+                TweenMax.killTweensOf(logoCrystal);
+                TweenMax.to(logoCrystal.scale, 2, {
+                    ease: Power3.easeOut,
+                    x: 1,
+                    y: 1,
+                    z: 1,
+                    onComplete() {
+                        // currentState = State.Saround;
+                        partialCrystals.forEach(partCrystal => {
+                            TweenMax.killTweensOf(partCrystal);
+                            partCrystal.visible = false;
+                            gatherTimer = 0;
+                        })
+                    },
+                    onUpdate() {
+
+                    }
+                });
+            }
+            break;
+        case State.End:
+
             break;
         default:
             break;
     }
 
-
-    if (Math.abs(oldMouseX - mouseX) > 0 || Math.abs(oldMouseY - mouseY) > 0) {
-        mouseDownTimer = 0;
-    }
-    oldMouseX = mouseX;
-    oldMouseY = mouseY
-
     renderer.render(scene, camera);
-    composer.render(0.01);
+    // composer.render(0.01);
 }
