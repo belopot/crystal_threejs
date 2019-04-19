@@ -10,7 +10,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var crystalParent;
-var partialCrystalCount = 110;
+var partialCrystalCount = 150;
 
 var isMobile = false;
 
@@ -78,11 +78,11 @@ var State = {
     Logo: 5,
     End: 6,
     times: {
-        1: { value: 0 },
+        1: { value: 4 },
         2: { value: 13.0 },
-        3: { value: 8.6 },
-        4: { value: 6 },
-        5: { value: 5.5 },
+        3: { value: 6.6 },
+        4: { value: 3 },
+        5: { value: 4 },
         6: { value: 0 },
     }
 };
@@ -178,7 +178,7 @@ function init() {
         //////////////////////////////////////////////////////////////////////////////////////////////
         //Light
         //////////////////////////////////////////////////////////////////////////////////////////////
-        if(!useShader){
+        if (!useShader) {
             ambientLight = new THREE.AmbientLight(0x0000ff);
             ambientLight.intensity = 100;
             scene.add(ambientLight);
@@ -388,7 +388,6 @@ function init() {
             }
         });
         logoCrystal.scale.set(0.3, 0.3, 0.3);
-
     };
 
 
@@ -436,14 +435,14 @@ function init() {
     sCrystalMaterial = new THREE.MeshPhysicalMaterial({
         // color: 0x0000ff,
         // emissive: 0xffffff,
-        roughness: 0.005,
-        metalness: 0.8,
+        roughness: 0.001,
+        metalness: 0.9,
         reflectivity: 0.5,
         opacity: 1,
         side: THREE.DoubleSide,
         transparent: true,
         mapping: THREE.CubeRefractionMapping,
-        envMapIntensity: 2.3,
+        envMapIntensity: 1,
         envMaps: envMap,
         premultipliedAlpha: true,
         map: sCrystalDiffuseMap,
@@ -483,7 +482,7 @@ function init() {
                 prefix + 'pz' + postfix, prefix + 'nz' + postfix
             ];
         };
-        var hdrUrls = genCubeUrls("Assets/texture/hdr/Park2/", ".hdr");
+        var hdrUrls = genCubeUrls("Assets/texture/hdr/", ".hdr");
         new THREE.HDRCubeTextureLoader(manager).load(THREE.UnsignedByteType, hdrUrls, function (hdrCubeMap) {
             var pmremGenerator = new THREE.PMREMGenerator(hdrCubeMap);
             pmremGenerator.update(renderer);
@@ -510,8 +509,8 @@ function init() {
 
     //Partial Model
     crystalParent = new THREE.Object3D()
-    let largeCrystalSize = useTsu ? 0.002 : 0.3;
-    let smallsCrystalSize = useTsu ? 0.002 : 0.7;
+    let largeCrystalSize = useTsu ? 0.0025 : 0.3;
+    let smallsCrystalSize = useTsu ? 0.0025 : 0.7;
     let partialCrystalIdx = [];
     let largeCrystalPercent = useTsu ? 0.6 : 0.4;
     let largeCrystalEndIdx = Math.floor(partialCrystalCount * largeCrystalPercent);
@@ -838,7 +837,7 @@ function render() {
                 partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2200;
             }
             if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo) {
-                accelTimerForRootAngle += isMobile? 0.000011 : 0.0000011;
+                accelTimerForRootAngle += isMobile ? 0.000011 : 0.0000011;
                 let a = 0.001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
                 partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2200 + a;
@@ -859,12 +858,12 @@ function render() {
                     let idx = 0;
                     partialCrystals.forEach(partCrystal => {
                         //Random point within sphere uniformly
-                        let rx = initPositionOfPartialCrystals[idx].x * 0.3;
-                        let ry = initPositionOfPartialCrystals[idx].y * 0.3;
-                        let rz = initPositionOfPartialCrystals[idx].z * 0.3;
-                        let sx = initScaleOfPartialCrystals[idx].x * 0.7;
-                        let sy = initScaleOfPartialCrystals[idx].y * 0.7;
-                        let sz = initScaleOfPartialCrystals[idx].z * 0.7;
+                        let rx = initPositionOfPartialCrystals[idx].x * 0.25;
+                        let ry = initPositionOfPartialCrystals[idx].y * 0.25;
+                        let rz = initPositionOfPartialCrystals[idx].z * 0.25;
+                        let sx = initScaleOfPartialCrystals[idx].x * 0.4;
+                        let sy = initScaleOfPartialCrystals[idx].y * 0.4;
+                        let sz = initScaleOfPartialCrystals[idx].z * 0.4;
                         TweenMax.killTweensOf(partCrystal);
                         TweenMax.to(partCrystal.position, 2, {
                             ease: Sine.easeInOut,
@@ -890,6 +889,20 @@ function render() {
 
                             }
                         });
+                        //Change Material
+                        if (!useShader) {
+                            partCrystal.traverse(function (child) {
+                                if (child instanceof THREE.Mesh) {
+                                    let isMarker = child.name.includes("photo");
+                                    if (!isMarker) {
+                                        TweenMax.to(child.material, 1.5, {
+                                            ease: Power1.easeIn,
+                                            envMapIntensity: 5,
+                                        });
+                                    }
+                                }
+                            });
+                        }
                         idx++;
                     });
                 }
@@ -936,6 +949,20 @@ function render() {
 
                         }
                     });
+                    //Change Material
+                    if (!useShader) {
+                        partCrystal.traverse(function (child) {
+                            if (child instanceof THREE.Mesh) {
+                                let isMarker = child.name.includes("photo");
+                                if (!isMarker) {
+                                    TweenMax.to(child.material, 0.5, {
+                                        ease: Power1.easeIn,
+                                        envMapIntensity: 1,
+                                    });
+                                }
+                            }
+                        });
+                    }
                     idx++;
                 });
             }
@@ -956,8 +983,8 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 1.8, {
-                        ease: Power2.easeOut,
+                    TweenMax.to(partCrystal.position, 1.0, {
+                        ease: Power1.easeOut,
                         x: 0,
                         y: 0,
                         z: 0,
@@ -997,17 +1024,16 @@ function render() {
                 downTimer = 0;
 
                 logoCrystal.visible = true;
-                partialCrystals.forEach(partCrystal => {
-                    TweenMax.killTweensOf(partCrystal);
-                    partCrystal.visible = false;
-                })
+                logoCrystal.rotation.set(0, 0, 0);
+                crystalParent.rotation.set(0, -Math.PI * 3.3 / 5, 0);
+
 
                 TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(logoCrystal.scale, 2.1, {
+                TweenMax.to(logoCrystal.scale, 3.9, {
                     ease: Power1.easeOut,
-                    x: 1,
-                    y: 1,
-                    z: 1,
+                    x: 0.9,
+                    y: 0.9,
+                    z: 0.9,
                     onComplete() {
                         // currentState = State.Saround;
 
@@ -1023,11 +1049,16 @@ function render() {
                         envMapIntensity: 3.3,
                     });
                 }
+
+
             }
             break;
         case State.End:
             downTimer = 0;
             accelTimerForRootAngle = 0;
+            partialCrystals.forEach(partCrystal => {
+                partCrystal.visible = false;
+            })
             break;
         default:
             break;
