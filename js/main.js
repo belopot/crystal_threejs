@@ -10,6 +10,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var crystalParent;
+var partialCrystalParent;
 var partialCrystalCount = 150;
 
 var isMobile = false;
@@ -79,7 +80,7 @@ var State = {
     End: 6,
     times: {
         1: { value: 4 },
-        2: { value: 13.0 },
+        2: { value: 15.0 },
         3: { value: 6.6 },
         4: { value: 3 },
         5: { value: 4 },
@@ -88,6 +89,14 @@ var State = {
 };
 
 var currentState = State.Laround;
+
+// Effect
+var expShader, ringShader;
+var expTextures, ringTextures;
+var expMesh, ringMesh;
+var startEffect = false;
+var expTimer = 0;
+var ringTimer = 0;
 
 function getRandomScale(low, high) {
     return getRandom() * (high - low) + low
@@ -180,11 +189,11 @@ function init() {
         //////////////////////////////////////////////////////////////////////////////////////////////
         if (!useShader) {
             ambientLight = new THREE.AmbientLight(0x0000ff);
-            ambientLight.intensity = 100;
+            ambientLight.intensity = 50;
             scene.add(ambientLight);
-            directionalLight = new THREE.DirectionalLight(0xffffff);
-            directionalLight.position.set(1, 30, -1);
-            scene.add(directionalLight);
+            // directionalLight = new THREE.DirectionalLight(0xffffff);
+            // directionalLight.position.set(1, 30, -1);
+            // scene.add(directionalLight);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -388,6 +397,26 @@ function init() {
             }
         });
         logoCrystal.scale.set(0.3, 0.3, 0.3);
+
+        //Effect Mesh
+        let expGeo = new THREE.RingGeometry(1, 12, 30);
+        let expBGeo = new THREE.BufferGeometry();
+        expBGeo.fromGeometry(expGeo);
+        var expMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
+        expMesh = new THREE.Mesh(expBGeo, expMaterial);
+        expMesh.position.set(0, 0, 120);
+        expMesh.visible = false;
+        cameraRoot.add(expMesh);
+
+        let ringGeo = new THREE.RingGeometry(1, 15, 30);
+        let ringBGeo = new THREE.BufferGeometry();
+        ringBGeo.fromGeometry(ringGeo);
+        var ringMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
+        ringMesh = new THREE.Mesh(ringBGeo, ringMaterial);
+        ringMesh.position.set(0, 0, 80);
+        ringMesh.visible = false;
+        cameraRoot.add(ringMesh);
+
     };
 
 
@@ -405,6 +434,18 @@ function init() {
     };
 
     var textureLoader = new THREE.TextureLoader(manager);
+
+    var effectPath = "Assets/effect/";
+    expTextures = [];
+    for (let i = 0; i < 61; i++) {
+        let txt = textureLoader.load(effectPath + "exp/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
+        expTextures.push(txt);
+    }
+    ringTextures = [];
+    for (let i = 0; i < 76; i++) {
+        let txt = textureLoader.load(effectPath + "ring/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
+        ringTextures.push(txt);
+    }
 
     var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
     envMap = textureLoader.load(texturePath + "env.jpg");
@@ -482,7 +523,7 @@ function init() {
                 prefix + 'pz' + postfix, prefix + 'nz' + postfix
             ];
         };
-        var hdrUrls = genCubeUrls("Assets/texture/hdr/", ".hdr");
+        var hdrUrls = genCubeUrls("Assets/texture/hdr/Park2/", ".hdr");
         new THREE.HDRCubeTextureLoader(manager).load(THREE.UnsignedByteType, hdrUrls, function (hdrCubeMap) {
             var pmremGenerator = new THREE.PMREMGenerator(hdrCubeMap);
             pmremGenerator.update(renderer);
@@ -553,7 +594,9 @@ function init() {
             partialCrystalRoot.rotation.set(0, beta, 0);
             partialCrystalRoots.push(partialCrystalRoot);
 
-            crystalParent.add(partialCrystalRoot);
+            partialCrystalParent = new THREE.Object3D();
+            partialCrystalParent.add(partialCrystalRoot);
+            crystalParent.add(partialCrystalParent);
             scene.add(crystalParent);
 
             partialCrystalRoot.updateMatrixWorld();
@@ -783,6 +826,28 @@ function logoCrystalUpdate(time, texture, pos) {
     }
 }
 
+function expUpdate(texture) {
+    if (expMesh) {
+        expMesh.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material.map = texture;
+                child.material.needsUpdate = true;
+            }
+        });
+    }
+}
+
+function ringUpdate(texture) {
+    if (ringMesh) {
+        ringMesh.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material.map = texture;
+                child.material.needsUpdate = true;
+            }
+        });
+    }
+}
+
 function render() {
     if (!loaded)
         return;
@@ -793,9 +858,10 @@ function render() {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     envSphere.rotation.y += Math.PI / 180 / 10;
+    let time = (new Date).getTime() - startTime;
+    let t = time / 180 * Math.PI / 20;
+
     if (useShader) {
-        let time = (new Date).getTime() - startTime;
-        let t = time / 180 * Math.PI / 20;
         lightPosition.x = 180 * Math.cos(t);
         lightPosition.z = 180 * Math.sin(t);
 
@@ -808,6 +874,7 @@ function render() {
         cubeCamera1.update(renderer, scene);
         cubeCamera1.renderTarget.texture.needsUpdate = true;
     }
+
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -827,22 +894,23 @@ function render() {
             partialCrystals[i].rotation.x += partialCrystalAngleSpeeds[i].x / 240;
             partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].y / 240;
             partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].z / 240;
+
         }
 
         //Rotate world space
         if (partialCrystalRoots[i]) {
             if (currentState == State.Laround) {
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2200;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2200;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2200;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2400;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2400;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2400;
             }
             if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo) {
                 accelTimerForRootAngle += isMobile ? 0.000011 : 0.0000011;
                 let a = 0.001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2200 + a;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2200 + a;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2200 + a;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2400 + a;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2400 + a;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2400 + a;
             }
         }
     }
@@ -858,9 +926,9 @@ function render() {
                     let idx = 0;
                     partialCrystals.forEach(partCrystal => {
                         //Random point within sphere uniformly
-                        let rx = initPositionOfPartialCrystals[idx].x * 0.25;
-                        let ry = initPositionOfPartialCrystals[idx].y * 0.25;
-                        let rz = initPositionOfPartialCrystals[idx].z * 0.25;
+                        let rx = initPositionOfPartialCrystals[idx].x * 0.23;
+                        let ry = initPositionOfPartialCrystals[idx].y * 0.23;
+                        let rz = initPositionOfPartialCrystals[idx].z * 0.23;
                         let sx = initScaleOfPartialCrystals[idx].x * 0.4;
                         let sy = initScaleOfPartialCrystals[idx].y * 0.4;
                         let sz = initScaleOfPartialCrystals[idx].z * 0.4;
@@ -989,7 +1057,11 @@ function render() {
                         y: 0,
                         z: 0,
                         onComplete() {
-
+                            startEffect = true;
+                            expTimer = 0;
+                            ringTimer = 0;
+                            expMesh.visible = true;
+                            ringMesh.visible = true;
                         },
                         onUpdate() {
                         }
@@ -1031,9 +1103,9 @@ function render() {
                 TweenMax.killTweensOf(logoCrystal);
                 TweenMax.to(logoCrystal.scale, 3.9, {
                     ease: Power1.easeOut,
-                    x: 0.9,
-                    y: 0.9,
-                    z: 0.9,
+                    x: 1,
+                    y: 1,
+                    z: 1,
                     onComplete() {
                         // currentState = State.Saround;
 
@@ -1063,6 +1135,20 @@ function render() {
         default:
             break;
     }
+
+    if (startEffect) {
+        expUpdate(expTextures[Math.floor(expTimer)]);
+        ringUpdate(ringTextures[Math.floor(ringTimer)]);
+        expTimer += delta * 5;
+        ringTimer += delta * 5.5;
+
+        if (expTimer > expTextures.length || ringTimer > ringTextures.length){
+            startEffect = false;
+            expMesh.visible = false;
+            ringMesh.visible = false;
+        }
+    }
+
 
     envSphere.visible = false;
     renderer.render(scene, camera);
