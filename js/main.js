@@ -574,7 +574,7 @@ function init() {
             side: THREE.DoubleSide,
             transparent: true,
             mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: useTsu ? 1 : 3.3,
+            envMapIntensity: useTsu ? 1 : 5.3,
             envMaps: envMap,
             premultipliedAlpha: true,
             map: sCrystalDiffuseMap,
@@ -595,7 +595,7 @@ function init() {
             side: THREE.DoubleSide,
             transparent: true,
             mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: 3.3,
+            envMapIntensity: 4.3,
             envMaps: envMap,
             premultipliedAlpha: true,
             map: lCrystalDiffuseMap,
@@ -612,7 +612,7 @@ function init() {
                 prefix + 'pz' + postfix, prefix + 'nz' + postfix
             ];
         };
-        var hdrUrls = genCubeUrls("Assets/texture/hdr/Park2/", ".hdr");
+        var hdrUrls = genCubeUrls("Assets/texture/hdr/", ".hdr");
         new THREE.HDRCubeTextureLoader(manager).load(THREE.UnsignedByteType, hdrUrls, function (hdrCubeMap) {
             var pmremGenerator = new THREE.PMREMGenerator(hdrCubeMap);
             pmremGenerator.update(renderer);
@@ -1055,7 +1055,7 @@ function render() {
                                     if (!isMarker) {
                                         TweenMax.to(child.material, 1.5, {
                                             ease: Power1.easeIn,
-                                            envMapIntensity: 5,
+                                            envMapIntensity: 20,
                                         });
                                     }
                                 }
@@ -1115,7 +1115,7 @@ function render() {
                                 if (!isMarker) {
                                     TweenMax.to(child.material, 0.5, {
                                         ease: Power1.easeIn,
-                                        envMapIntensity: useTsu? 1 : 3.3,
+                                        envMapIntensity: useTsu? 1 : 5.3,
                                     });
                                 }
                             }
@@ -1210,6 +1210,7 @@ function render() {
                         ease: Power3.easeOut,
                         envMapIntensity: 3.3,
                     });
+
                 }
                 else{
                     TweenMax.to(logoCrystal.children[0].material.uniforms.animationParam3, 3, {
@@ -1242,7 +1243,15 @@ function render() {
             startEffect = false;
             expMesh.visible = false;
             ringMesh.visible = false;
+            // logoCrystal.position.x = 0;
+            // logoCrystal.position.y = 0;
+            // logoCrystal.position.z = 0;
         }
+        //Vibrate
+        console.log(expTimer)
+        logoCrystal.position.x += (8-expTimer/11) * 0.1 * Math.sin(t * 600.0);
+        logoCrystal.position.y += (8-expTimer/11) * 0.1 * Math.sin(t * 200.0);
+        logoCrystal.position.z += (8-expTimer/11) * 0.1 * Math.sin(t * 600.0);
     }
 
 
