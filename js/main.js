@@ -70,7 +70,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var partialCrystalParent;
-var partialCrystalCount = 150;
+var partialCrystalCount = 166;
 
 var partial2Crystals = [];
 var partial2CrystalRoots = [];
@@ -78,7 +78,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 60;
+var partial2CrystalCount = 56;
 
 var totalRoot;
 
@@ -118,6 +118,13 @@ var sCrystalRadius;
 var envSphere;
 var lightPosition = new THREE.Vector3(0, 0, 0);
 var startTime;
+var lightValueParam = {
+    value: 1
+};
+
+var animationParam2 = {
+    value: 1
+}
 
 //Gather mesh
 var downTimer = 0;
@@ -138,8 +145,8 @@ var State = {
     times: {
         1: { value: 4 },
         2: { value: 15.0 },
-        3: { value: 6.6 },
-        4: { value: 3 },
+        3: { value: 10.6 },
+        4: { value: 1 },
         5: { value: 4 },
         6: { value: 0 },
         7: { value: 3 },
@@ -203,12 +210,12 @@ function init() {
         //////////////////////////////////////////////////////////////////////////////////////////////
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000b1b);
-        scene.background = new THREE.Color(0x0505ff);
+        // scene.background = new THREE.Color(0x0505ff);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true});
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -218,7 +225,7 @@ function init() {
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Camera
         //////////////////////////////////////////////////////////////////////////////////////////////
-        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 300);
+        camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 300);
         camera.position.x = -135;
         camera.position.y = 0;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -295,7 +302,7 @@ function init() {
             let alpha = 2 * Math.PI * getRandom();
             let beta = getRandomScale(-2 * Math.PI, 2 * Math.PI);
 
-            let ua = getRandomScale(50, 120);
+            let ua = getRandomScale(20, 150);
 
             let rx = symbolX * ua * Math.cos(alpha);
             let ry = symbolY * ua * Math.sin(alpha);
@@ -304,7 +311,7 @@ function init() {
             let partialCrystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partialCrystal.visible = true;
             partialCrystal.position.set(rx, ry, rz);
-            let partialCrystalSize = 2.5;
+            let partialCrystalSize = 3.6;
             partialCrystal.scale.set(partialCrystalSize, partialCrystalSize, partialCrystalSize);
             partialCrystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
             partialCrystals.push(partialCrystal);
@@ -349,16 +356,16 @@ function init() {
 
             let alpha = 2 * Math.PI * getRandom();
 
-            let ua = getRandomScale(34, 80);
+            let ua = getRandomScale(14, 100);
 
             let rx = symbolX * ua * Math.cos(alpha);
             let rz = symbolY * ua * Math.sin(alpha);
-            let ry = getRandomScale(-25, 25);
+            let ry = getRandomScale(-35, 35);
 
             let partial2Crystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partial2Crystal.visible = false;
             partial2Crystal.position.set(rx, ry, rz);
-            let partial2CrystalSize = 1.1;
+            let partial2CrystalSize = 1.6;
             partial2Crystal.scale.set(partial2CrystalSize, partial2CrystalSize, partial2CrystalSize);
             partial2Crystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
             partial2Crystals.push(partial2Crystal);
@@ -447,8 +454,8 @@ function init() {
     }
 
     var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
-    var envFileName = "env15"
-    envMap = textureLoader.load(texturePath + "env/"+envFileName+".jpg");
+    var envFileName = "env1"
+    envMap = textureLoader.load(texturePath + "env/" + envFileName + ".jpg");
     sCrystalDiffuseMap1 = textureLoader.load(texturePath + "small/diffuse1.jpg");
     sCrystalAlphaMap1 = textureLoader.load(texturePath + "small/alpha1.jpg");
     sCrystalSpecularMap1 = textureLoader.load(texturePath + "small/specular1.jpg");
@@ -1112,7 +1119,7 @@ function init() {
     envSphere = new THREE.Mesh(
         new THREE.SphereGeometry(250, 32, 16),
         new THREE.MeshBasicMaterial({
-            map: textureLoader.load(texturePath + "env/"+envFileName+".jpg"),
+            map: textureLoader.load(texturePath + "env/" + envFileName + ".jpg"),
             side: THREE.DoubleSide,
         })
     );
@@ -1127,7 +1134,7 @@ function init() {
     //Load logo crystal model
     var modelPath = useTsu ? "Assets/model/tsu/" : "Assets/model/";
     for (let i = 0; i < 2; i++) {
-        new THREE.OBJLoader(manager).setPath(modelPath).load('logo' + (i+1) + '.obj', function (object) {
+        new THREE.OBJLoader(manager).setPath(modelPath).load('logo' + (i + 1) + '.obj', function (object) {
             object.visible = false;
             object.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
@@ -1147,7 +1154,7 @@ function init() {
 
     //Load partial crystal model
     for (let i = 0; i < 11; i++) {
-        new THREE.OBJLoader(manager).setPath(modelPath).load((i+1) + '.obj', function (object) {
+        new THREE.OBJLoader(manager).setPath(modelPath).load((i + 1) + '.obj', function (object) {
             object.visible = false;
             object.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
@@ -1367,8 +1374,8 @@ function partialCrystalUpdate(time, texture, pos) {
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld)
                     child.material.uniforms["animationParam1"].value = 1;
-                    child.material.uniforms["animationParam2"].value = 1;
-                    child.material.uniforms.lightValueParam.value = 1;
+                    child.material.uniforms["animationParam2"].value = animationParam2.value;
+                    child.material.uniforms.lightValueParam.value = lightValueParam.value;
                     child.material.uniforms.radius = distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
                     child.material.needsUpdate = true;
                 }
@@ -1389,8 +1396,8 @@ function partial2CrystalUpdate(time, texture, pos) {
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
                     child.material.uniforms["animationParam1"].value = 1;
-                    child.material.uniforms["animationParam2"].value = 1;
-                    child.material.uniforms.lightValueParam.value = 1;
+                    child.material.uniforms["animationParam2"].value = animationParam2.value;
+                    child.material.uniforms.lightValueParam.value = lightValueParam.value;
                     child.material.uniforms.radius = distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
                     child.material.needsUpdate = true;
                 }
@@ -1410,8 +1417,8 @@ function logoCrystalUpdate(time, texture, pos) {
                 child.material.uniforms.lightPosition.value = pos;
                 child.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld)
                 child.material.uniforms["animationParam1"].value = 1;
-                child.material.uniforms["animationParam2"].value = 1;
-                child.material.uniforms.lightValueParam.value = 1;
+                child.material.uniforms["animationParam2"].value = animationParam2.value;
+                child.material.uniforms.lightValueParam.value = lightValueParam.value;
                 child.material.needsUpdate = true;
             }
         });
@@ -1488,9 +1495,9 @@ function render() {
 
     if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear || currentState == State.Partial) {
         //Logo Crystal Animation
-        logoCrystal.rotation.y += 0.04 * delta;
+        logoCrystal.rotation.y += 0.02 * delta;
         //Partial2 Crystal Animation    
-        partial2CrystalParent.rotation.y += 0.04 * delta;
+        partial2CrystalParent.rotation.y += 0.02 * delta;
         for (let i = 0; i < partial2CrystalCount; i++) {
             //Rotate in local space
             if (partial2Crystals[i]) {
@@ -1522,8 +1529,8 @@ function render() {
                 partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 3600;
             }
             if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo) {
-                accelTimerForRootAngle += isMobile ? 0.000011 : 0.0000011;
-                let a = 0.001 - accelTimerForRootAngle;
+                accelTimerForRootAngle += isMobile ? 0.00001 : 0.000001;
+                let a = 0.0001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
                 partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 3600 + a;
                 partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 3600 + a;
@@ -1545,12 +1552,12 @@ function render() {
                     let idx = 0;
                     partialCrystals.forEach(partCrystal => {
                         //Random point within sphere uniformly
-                        let rx = initPositionOfPartialCrystals[idx].x * 0.2;
-                        let ry = initPositionOfPartialCrystals[idx].y * 0.2;
-                        let rz = initPositionOfPartialCrystals[idx].z * 0.2;
-                        let sx = initScaleOfPartialCrystals[idx].x * 0.36;
-                        let sy = initScaleOfPartialCrystals[idx].y * 0.36;
-                        let sz = initScaleOfPartialCrystals[idx].z * 0.36;
+                        let rx = initPositionOfPartialCrystals[idx].x * 0.3;
+                        let ry = initPositionOfPartialCrystals[idx].y * 0.3;
+                        let rz = initPositionOfPartialCrystals[idx].z * 0.3;
+                        let sx = initScaleOfPartialCrystals[idx].x * 0.47;
+                        let sy = initScaleOfPartialCrystals[idx].y * 0.47;
+                        let sz = initScaleOfPartialCrystals[idx].z * 0.47;
                         TweenMax.killTweensOf(partCrystal);
                         TweenMax.to(partCrystal.position, 2, {
                             ease: Sine.easeInOut,
@@ -1589,6 +1596,11 @@ function render() {
                         }
                         idx++;
                     });
+                    TweenMax.to(animationParam2, 2, {
+                        ease: Sine.easeInOut,
+                        value: 0.6,
+                    });
+                    lightValueParam.value = 10000;
                 }
 
             }
@@ -1650,6 +1662,11 @@ function render() {
                     }
                     idx++;
                 });
+                TweenMax.to(animationParam2, 2, {
+                    ease: Sine.easeInOut,
+                    value: 1,
+                });
+                lightValueParam.value = 1;
             }
             if (autoCreate)
                 isMouseDown = false;
@@ -1670,7 +1687,7 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 1.0, {
+                    TweenMax.to(partCrystal.position, 0.7, {
                         ease: Power1.easeOut,
                         x: 0,
                         y: 0,
@@ -1695,6 +1712,11 @@ function render() {
 
 
                 });
+                TweenMax.to(animationParam2, 0.7, {
+                    ease: Power1.easeOut,
+                    value: 0.1,
+                });
+                lightValueParam.value = 10000;
             }
             //Hide holder
             holderContainer.classList.add("hidden");
@@ -1719,7 +1741,7 @@ function render() {
 
                 //Control Logo crystal
                 TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(logoCrystal.scale, 3.5, {
+                TweenMax.to(logoCrystal.scale, 2.5, {
                     ease: Power1.easeOut,
                     x: 1,
                     y: 1,
@@ -1747,13 +1769,13 @@ function render() {
                 partial2Crystals.forEach(part2Crystal => {
                     part2Crystal.visible = true;
                     TweenMax.killTweensOf(part2Crystal);
-                    TweenMax.to(part2Crystal.position, 3.5, {
+                    TweenMax.to(part2Crystal.position, 2.5, {
                         ease: Power1.easeOut,
                         x: initPositionOfPartial2Crystals[idx].x,
                         y: initPositionOfPartial2Crystals[idx].y,
                         z: initPositionOfPartial2Crystals[idx].z,
                     });
-                    TweenMax.to(part2Crystal.scale, 3.5, {
+                    TweenMax.to(part2Crystal.scale, 2.5, {
                         ease: Power1.easeOut,
                         x: initScaleOfPartial2Crystals[idx].x,
                         y: initScaleOfPartial2Crystals[idx].y,
@@ -1777,6 +1799,11 @@ function render() {
                         });
                     }
                     idx++;
+                });
+
+                TweenMax.to(animationParam2, 3, {
+                    ease: Power1.easeOut,
+                    value: 1,
                 });
 
             }
@@ -1828,9 +1855,9 @@ function render() {
         case State.LogoGather:
             if (isMouseDown) {
                 //Vibrate
-                logoCrystal.position.x = 0.1 * Math.sin((t - vibrateStartTime) * 100.0);
-                logoCrystal.position.y = 0.3 * Math.sin((t - vibrateStartTime) * 50.0);
-                logoCrystal.position.z = 0.7 * Math.sin((t - vibrateStartTime) * 100.0);
+                logoCrystal.position.x = 0.5 * Math.sin((t - vibrateStartTime) * 120.0);
+                logoCrystal.position.y = 0.4 * Math.sin((t - vibrateStartTime) * 120.0);
+                logoCrystal.position.z = 0.5 * Math.sin((t - vibrateStartTime) * 120.0);
 
                 downTimer += delta;
                 if (downTimer > State.times[currentState].value) {
@@ -1875,9 +1902,9 @@ function render() {
                     TweenMax.killTweensOf(logoCrystal);
                     TweenMax.to(logoCrystal.scale, 1, {
                         ease: Expo.easeIn,
-                        x: 0.1,
-                        y: 0.1,
-                        z: 0.1,
+                        x: 0.01,
+                        y: 0.01,
+                        z: 0.01,
                     });
                     downTimer = 0;
                 }
@@ -1981,6 +2008,7 @@ function render() {
         case State.Partial:
             downTimer += delta;
             if (downTimer > State.times[currentState].value) {
+                downTimer = 0;
                 currentState = State.Laround;
             }
 
