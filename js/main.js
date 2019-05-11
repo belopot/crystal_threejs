@@ -1,14 +1,13 @@
 var container;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
-var sCrystalMaterial1;
-var sCrystalMaterial2;
-var sCrystalMaterial3;
-var sCrystalMaterial4;
 
 var sCrystalShader1;
 var sCrystalShader2;
 var sCrystalShader3;
 var sCrystalShader4;
+
+var lCrystalShader1;
+var lCrystalShader2;
 
 var sCrystalDiffuseMap1;
 var sCrystalAlphaMap1;
@@ -33,12 +32,6 @@ var sCrystalAlphaMap4;
 var sCrystalSpecularMap4;
 var sCrystalNormalMap4;
 var sCrystalBumpMap4;
-
-var lCrystalMaterial1;
-var lCrystalMaterial2;
-
-var lCrystalShader1;
-var lCrystalShader2;
 
 var lCrystalDiffuseMap1;
 var lCrystalAlphaMap1;
@@ -70,7 +63,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var partialCrystalParent;
-var partialCrystalCount = 166;
+var partialCrystalCount = 156;
 
 var partial2Crystals = [];
 var partial2CrystalRoots = [];
@@ -109,8 +102,7 @@ var oldDownPosY = 0;
 var firstDown = true;
 
 var useTsu = false;
-//Shader
-var useShader = true;
+
 var envMap;
 
 var sCrystalRadius;
@@ -182,7 +174,6 @@ function getRandom() {
     return (Math.random() + Math.random() + Math.random() + Math.random()) / 4
 }
 
-
 function mobileAndTabletcheck() {
     var check = false;
     (function (a) { if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true; })(navigator.userAgent || navigator.vendor || window.opera);
@@ -209,13 +200,13 @@ function init() {
         //Scene
         //////////////////////////////////////////////////////////////////////////////////////////////
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000b1b);
+        // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -233,30 +224,14 @@ function init() {
         cameraRoot.add(camera);
         scene.add(cameraRoot);
 
-        if (useShader) {
-            cubeCamera1 = new THREE.CubeCamera(1, 1000, 512);
-            cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-            cubeCamera2 = new THREE.CubeCamera(1, 1000, 512);
-            cubeCamera2.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-            cubeCamera1.position.set(0, 0, 135);
-            cubeCamera1.position.set(0, 0, 135);
-            scene.add(cubeCamera1);
-            scene.add(cubeCamera2);
-        }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        //Light
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        if (!useShader) {
-            ambientLight = new THREE.AmbientLight(0x0000ff);
-            ambientLight.intensity = 50;
-            scene.add(ambientLight);
-            directionalLight = new THREE.DirectionalLight(0xffffff);
-            directionalLight.position.set(1, 30, -1);
-            directionalLight.intensity = 5;
-            scene.add(directionalLight);
-        }
+        cubeCamera1 = new THREE.CubeCamera(1, 1000, 512);
+        cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+        cubeCamera2 = new THREE.CubeCamera(1, 1000, 512);
+        cubeCamera2.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+        cubeCamera1.position.set(0, 0, 135);
+        cubeCamera1.position.set(0, 0, 135);
+        scene.add(cubeCamera1);
+        scene.add(cubeCamera2);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Clock
@@ -267,13 +242,13 @@ function init() {
         //Effects
         /////////////////////////////////////////////////////////////////////////////////////////////
         // var renderModel = new THREE.RenderPass(scene, camera);
-        // var effectBloom = new THREE.BloomPass(1.4);
+        var effectBloom = new THREE.BloomPass(400.4);
         // var effectFilm = new THREE.FilmPass(0.1, 0.1, 2048, false);
         // effectFilm.renderToScreen = true;
 
-        // composer = new THREE.EffectComposer(renderer);
+        composer = new THREE.EffectComposer(renderer);
         // composer.addPass(renderModel);
-        // composer.addPass(effectBloom);
+        composer.addPass(effectBloom);
         // composer.addPass(effectFilm);
 
         isMobile = mobileAndTabletcheck()
@@ -454,7 +429,7 @@ function init() {
     }
 
     var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
-    var envFileName = "env1"
+    var envFileName = "env5"
     envMap = textureLoader.load(texturePath + "env/" + envFileName + ".jpg");
     sCrystalDiffuseMap1 = textureLoader.load(texturePath + "small/diffuse1.jpg");
     sCrystalAlphaMap1 = textureLoader.load(texturePath + "small/alpha1.jpg");
@@ -492,628 +467,485 @@ function init() {
     lCrystalNormalMap2 = textureLoader.load(texturePath + "logo/normal2.jpg");
     lCrystalBumpMap2 = textureLoader.load(texturePath + "logo/bump2.jpg");
 
-    if (!useShader) {
-        //Crystal Material
-        sCrystalMaterial1 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.001,
-            metalness: 0.9,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: useTsu ? 1 : 5.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: sCrystalDiffuseMap1,
-            alphaMap: sCrystalAlphaMap1,
-            specularMap: sCrystalSpecularMap1,
-            normalMap: sCrystalNormalMap1,
-            bumpMap: sCrystalBumpMap1,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        sCrystalMaterial2 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.001,
-            metalness: 0.9,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: useTsu ? 1 : 5.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: sCrystalDiffuseMap2,
-            alphaMap: sCrystalAlphaMap2,
-            specularMap: sCrystalSpecularMap2,
-            normalMap: sCrystalNormalMap2,
-            bumpMap: sCrystalBumpMap2,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        sCrystalMaterial3 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.001,
-            metalness: 0.9,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: useTsu ? 1 : 5.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: sCrystalDiffuseMap3,
-            alphaMap: sCrystalAlphaMap3,
-            specularMap: sCrystalSpecularMap3,
-            normalMap: sCrystalNormalMap3,
-            bumpMap: sCrystalBumpMap3,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        sCrystalMaterial4 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.001,
-            metalness: 0.9,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: useTsu ? 1 : 5.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: sCrystalDiffuseMap4,
-            alphaMap: sCrystalAlphaMap4,
-            specularMap: sCrystalSpecularMap4,
-            normalMap: sCrystalNormalMap4,
-            bumpMap: sCrystalBumpMap4,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        lCrystalMaterial1 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.005,
-            metalness: 0.8,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: 4.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: lCrystalDiffuseMap1,
-            alphaMap: lCrystalAlphaMap1,
-            specularMap: lCrystalSpecularMap1,
-            normalMap: lCrystalNormalMap1,
-            bumpMap: lCrystalBumpMap1,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        lCrystalMaterial2 = new THREE.MeshPhysicalMaterial({
-            // color: 0x0000ff,
-            // emissive: 0xffffff,
-            roughness: 0.005,
-            metalness: 0.8,
-            reflectivity: 0.5,
-            opacity: 1,
-            side: THREE.DoubleSide,
-            transparent: true,
-            mapping: THREE.CubeRefractionMapping,
-            envMapIntensity: 4.3,
-            envMaps: envMap,
-            premultipliedAlpha: true,
-            map: lCrystalDiffuseMap2,
-            alphaMap: lCrystalAlphaMap2,
-            specularMap: lCrystalSpecularMap2,
-            normalMap: lCrystalNormalMap2,
-            bumpMap: lCrystalBumpMap2,
-            normalScale: new THREE.Vector2(1.7, 1.7),
-        });
-
-        var genCubeUrls = function (prefix, postfix) {
-            return [
-                prefix + 'px' + postfix, prefix + 'nx' + postfix,
-                prefix + 'py' + postfix, prefix + 'ny' + postfix,
-                prefix + 'pz' + postfix, prefix + 'nz' + postfix
-            ];
-        };
-        var hdrUrls = genCubeUrls("Assets/texture/hdr/", ".hdr");
-        new THREE.HDRCubeTextureLoader(manager).load(THREE.UnsignedByteType, hdrUrls, function (hdrCubeMap) {
-            var pmremGenerator = new THREE.PMREMGenerator(hdrCubeMap);
-            pmremGenerator.update(renderer);
-            var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker(pmremGenerator.cubeLods);
-            pmremCubeUVPacker.update(renderer);
-            hdrCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
-            sCrystalMaterial1.envMap = hdrCubeRenderTarget.texture;
-            sCrystalMaterial1.needsUpdate = true;
-            sCrystalMaterial2.envMap = hdrCubeRenderTarget.texture;
-            sCrystalMaterial2.needsUpdate = true;
-            sCrystalMaterial3.envMap = hdrCubeRenderTarget.texture;
-            sCrystalMaterial3.needsUpdate = true;
-            sCrystalMaterial4.envMap = hdrCubeRenderTarget.texture;
-            sCrystalMaterial4.needsUpdate = true;
-            lCrystalMaterial.envMap = hdrCubeRenderTarget.texture;
-            lCrystalMaterial.needsUpdate = true;
-            hdrCubeMap.dispose();
-            pmremGenerator.dispose();
-            pmremCubeUVPacker.dispose();
-        });
-    }
-    else {
-        sCrystalShader1 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: sCrystalAlphaMap1
-                },
-                bumpMap: {
-                    type: "t",
-                    value: sCrystalBumpMap1
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.1
-                },
-                normalMap: {
-                    type: "t",
-                    value: sCrystalNormalMap1
-                },
-                specularMap: {
-                    type: "t",
-                    value: sCrystalSpecularMap1
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                radius: {
-                    type: "1f",
-                    value: 180
-                },
-                radiusRatio: {
-                    type: "1f",
-                    value: 1
-                },
-                rotationSpeed: {
-                    type: "1f",
-                    value: .001
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .1
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    sCrystalShader1 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            map: {
+                type: "t",
+                value: sCrystalDiffuseMap1
+            },
+            alphaMap: {
+                type: "t",
+                value: sCrystalAlphaMap1
+            },
+            bumpMap: {
+                type: "t",
+                value: sCrystalBumpMap1
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.1
+            },
+            normalMap: {
+                type: "t",
+                value: sCrystalNormalMap1
+            },
+            specularMap: {
+                type: "t",
+                value: sCrystalSpecularMap1
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            radius: {
+                type: "1f",
+                value: 180
+            },
+            radiusRatio: {
+                type: "1f",
+                value: 1
+            },
+            rotationSpeed: {
+                type: "1f",
+                value: .001
+            },
+            alphaValue: {
+                type: "1f",
+                value: .1
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
+        }
+    });
 
-        sCrystalShader2 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: sCrystalAlphaMap2
-                },
-                bumpMap: {
-                    type: "t",
-                    value: sCrystalBumpMap2
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.1
-                },
-                normalMap: {
-                    type: "t",
-                    value: sCrystalNormalMap2
-                },
-                specularMap: {
-                    type: "t",
-                    value: sCrystalSpecularMap2
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                radius: {
-                    type: "1f",
-                    value: 180
-                },
-                radiusRatio: {
-                    type: "1f",
-                    value: 1
-                },
-                rotationSpeed: {
-                    type: "1f",
-                    value: .001
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .1
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    sCrystalShader2 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            map: {
+                type: "t",
+                value: sCrystalDiffuseMap2
+            },
+            alphaMap: {
+                type: "t",
+                value: sCrystalAlphaMap2
+            },
+            bumpMap: {
+                type: "t",
+                value: sCrystalBumpMap2
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.1
+            },
+            normalMap: {
+                type: "t",
+                value: sCrystalNormalMap2
+            },
+            specularMap: {
+                type: "t",
+                value: sCrystalSpecularMap2
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            radius: {
+                type: "1f",
+                value: 180
+            },
+            radiusRatio: {
+                type: "1f",
+                value: 1
+            },
+            rotationSpeed: {
+                type: "1f",
+                value: .001
+            },
+            alphaValue: {
+                type: "1f",
+                value: .1
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
+        }
+    });
 
-        sCrystalShader3 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: sCrystalAlphaMap3
-                },
-                bumpMap: {
-                    type: "t",
-                    value: sCrystalBumpMap3
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.1
-                },
-                normalMap: {
-                    type: "t",
-                    value: sCrystalNormalMap3
-                },
-                specularMap: {
-                    type: "t",
-                    value: sCrystalSpecularMap3
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                radius: {
-                    type: "1f",
-                    value: 180
-                },
-                radiusRatio: {
-                    type: "1f",
-                    value: 1
-                },
-                rotationSpeed: {
-                    type: "1f",
-                    value: .001
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .1
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    sCrystalShader3 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            map: {
+                type: "t",
+                value: sCrystalDiffuseMap3
+            },
+            alphaMap: {
+                type: "t",
+                value: sCrystalAlphaMap3
+            },
+            bumpMap: {
+                type: "t",
+                value: sCrystalBumpMap3
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.1
+            },
+            normalMap: {
+                type: "t",
+                value: sCrystalNormalMap3
+            },
+            specularMap: {
+                type: "t",
+                value: sCrystalSpecularMap3
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            radius: {
+                type: "1f",
+                value: 180
+            },
+            radiusRatio: {
+                type: "1f",
+                value: 1
+            },
+            rotationSpeed: {
+                type: "1f",
+                value: .001
+            },
+            alphaValue: {
+                type: "1f",
+                value: .1
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
+        }
+    });
 
-        sCrystalShader4 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: sCrystalAlphaMap4
-                },
-                bumpMap: {
-                    type: "t",
-                    value: sCrystalBumpMap4
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.1
-                },
-                normalMap: {
-                    type: "t",
-                    value: sCrystalNormalMap4
-                },
-                specularMap: {
-                    type: "t",
-                    value: sCrystalSpecularMap4
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                radius: {
-                    type: "1f",
-                    value: 180
-                },
-                radiusRatio: {
-                    type: "1f",
-                    value: 1
-                },
-                rotationSpeed: {
-                    type: "1f",
-                    value: .001
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .1
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    sCrystalShader4 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            map: {
+                type: "t",
+                value: sCrystalDiffuseMap4
+            },
+            alphaMap: {
+                type: "t",
+                value: sCrystalAlphaMap4
+            },
+            bumpMap: {
+                type: "t",
+                value: sCrystalBumpMap4
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.1
+            },
+            normalMap: {
+                type: "t",
+                value: sCrystalNormalMap4
+            },
+            specularMap: {
+                type: "t",
+                value: sCrystalSpecularMap4
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            radius: {
+                type: "1f",
+                value: 180
+            },
+            radiusRatio: {
+                type: "1f",
+                value: 1
+            },
+            rotationSpeed: {
+                type: "1f",
+                value: .001
+            },
+            alphaValue: {
+                type: "1f",
+                value: .1
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
+        }
+    });
 
-        lCrystalShader1 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float animationParam1;\nuniform float animationParam2;\nuniform float animationParam3;\nuniform float time;\nuniform float lightValueParam;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute float vertexRandomValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\n// #pragma glslify: snoise3 = require('glsl-noise/simplex/3d')\nfloat exponentialOut_3_2(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n#ifndef PI\n#define PI 3.141592653589793\n#endif\n\nfloat backOut_4_3(float t) {\n  float f = 1.0 - t;\n  return 1.0 - (pow(f, 3.0) - f * sin(f * PI));\n}\n\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.4;\n  return map_2_1(value, r, r + 0.6, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  pos *= exponentialOut_3_2(getAnimationParam(animationParam1, vertexRandomValue));\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n  float t = mod(time, 20000.0 * PI_1_0);\n  modelPos.x += animationParam3 * 0.1 * sin(t * 200.0);\n  modelPos.y += animationParam3 * 0.1 * sin(t * 400.0);\n  modelPos.z += animationParam3 * 0.1 * sin(t * 600.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  float len = length(position.xyz);\n  vLightValue = min(lightValueParam / len / len * (0.6 + vertexRandomValue * 0.4), 0.6);\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: lCrystalAlphaMap1
-                },
-                bumpMap: {
-                    type: "t",
-                    value: lCrystalBumpMap1
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.5
-                },
-                normalMap: {
-                    type: "t",
-                    value: lCrystalNormalMap1
-                },
-                specularMap: {
-                    type: "t",
-                    value: lCrystalSpecularMap1
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .4
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam3: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    lCrystalShader1 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float animationParam1;\nuniform float animationParam2;\nuniform float animationParam3;\nuniform float time;\nuniform float lightValueParam;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute float vertexRandomValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\n// #pragma glslify: snoise3 = require('glsl-noise/simplex/3d')\nfloat exponentialOut_3_2(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n#ifndef PI\n#define PI 3.141592653589793\n#endif\n\nfloat backOut_4_3(float t) {\n  float f = 1.0 - t;\n  return 1.0 - (pow(f, 3.0) - f * sin(f * PI));\n}\n\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.4;\n  return map_2_1(value, r, r + 0.6, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  pos *= exponentialOut_3_2(getAnimationParam(animationParam1, vertexRandomValue));\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n  float t = mod(time, 20000.0 * PI_1_0);\n  modelPos.x += animationParam3 * 0.1 * sin(t * 200.0);\n  modelPos.y += animationParam3 * 0.1 * sin(t * 400.0);\n  modelPos.z += animationParam3 * 0.1 * sin(t * 600.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  float len = length(position.xyz);\n  vLightValue = min(lightValueParam / len / len * (0.6 + vertexRandomValue * 0.4), 0.6);\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            alphaMap: {
+                type: "t",
+                value: lCrystalAlphaMap1
+            },
+            bumpMap: {
+                type: "t",
+                value: lCrystalBumpMap1
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.5
+            },
+            normalMap: {
+                type: "t",
+                value: lCrystalNormalMap1
+            },
+            specularMap: {
+                type: "t",
+                value: lCrystalSpecularMap1
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            alphaValue: {
+                type: "1f",
+                value: .4
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            animationParam3: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
+        }
+    });
 
-        lCrystalShader2 = new THREE.RawShaderMaterial({
-            vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float animationParam1;\nuniform float animationParam2;\nuniform float animationParam3;\nuniform float time;\nuniform float lightValueParam;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute float vertexRandomValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\n// #pragma glslify: snoise3 = require('glsl-noise/simplex/3d')\nfloat exponentialOut_3_2(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n#ifndef PI\n#define PI 3.141592653589793\n#endif\n\nfloat backOut_4_3(float t) {\n  float f = 1.0 - t;\n  return 1.0 - (pow(f, 3.0) - f * sin(f * PI));\n}\n\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.4;\n  return map_2_1(value, r, r + 0.6, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  pos *= exponentialOut_3_2(getAnimationParam(animationParam1, vertexRandomValue));\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n  float t = mod(time, 20000.0 * PI_1_0);\n  modelPos.x += animationParam3 * 0.1 * sin(t * 200.0);\n  modelPos.y += animationParam3 * 0.1 * sin(t * 400.0);\n  modelPos.z += animationParam3 * 0.1 * sin(t * 600.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  float len = length(position.xyz);\n  vLightValue = min(lightValueParam / len / len * (0.6 + vertexRandomValue * 0.4), 0.6);\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
-            fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
-            transparent: true,
-            uniforms: {
-                alphaMap: {
-                    type: "t",
-                    value: lCrystalAlphaMap2
-                },
-                bumpMap: {
-                    type: "t",
-                    value: lCrystalBumpMap2
-                },
-                envMap: {
-                    type: "t",
-                    value: envMap
-                },
-                envMapIntensity: {
-                    type: "1f",
-                    value: 0.5
-                },
-                normalMap: {
-                    type: "t",
-                    value: lCrystalNormalMap2
-                },
-                specularMap: {
-                    type: "t",
-                    value: lCrystalSpecularMap2
-                },
-                time: {
-                    type: "1f",
-                    value: null
-                },
-                refractionRatio: {
-                    type: "1f",
-                    value: 0.4
-                },
-                matrixWorldInverse: {
-                    type: "m4",
-                    value: null
-                },
-                lightPosition: {
-                    type: "3f",
-                    value: null
-                },
-                bumpRefraction: {
-                    type: "1f",
-                    value: 1
-                },
-                alphaValue: {
-                    type: "1f",
-                    value: .4
-                },
-                animationParam1: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam2: {
-                    type: "1f",
-                    value: 0
-                },
-                animationParam3: {
-                    type: "1f",
-                    value: 0
-                },
-                lightValueParam: {
-                    type: "1f",
-                    value: 0
-                }
+    lCrystalShader2 = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float animationParam1;\nuniform float animationParam2;\nuniform float animationParam3;\nuniform float time;\nuniform float lightValueParam;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute float vertexRandomValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\n// #pragma glslify: snoise3 = require('glsl-noise/simplex/3d')\nfloat exponentialOut_3_2(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n#ifndef PI\n#define PI 3.141592653589793\n#endif\n\nfloat backOut_4_3(float t) {\n  float f = 1.0 - t;\n  return 1.0 - (pow(f, 3.0) - f * sin(f * PI));\n}\n\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.4;\n  return map_2_1(value, r, r + 0.6, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  pos *= exponentialOut_3_2(getAnimationParam(animationParam1, vertexRandomValue));\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n  float t = mod(time, 20000.0 * PI_1_0);\n  modelPos.x += animationParam3 * 0.1 * sin(t * 200.0);\n  modelPos.y += animationParam3 * 0.1 * sin(t * 400.0);\n  modelPos.z += animationParam3 * 0.1 * sin(t * 600.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  float len = length(position.xyz);\n  vLightValue = min(lightValueParam / len / len * (0.6 + vertexRandomValue * 0.4), 0.6);\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            alphaMap: {
+                type: "t",
+                value: lCrystalAlphaMap2
+            },
+            bumpMap: {
+                type: "t",
+                value: lCrystalBumpMap2
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.5
+            },
+            normalMap: {
+                type: "t",
+                value: lCrystalNormalMap2
+            },
+            specularMap: {
+                type: "t",
+                value: lCrystalSpecularMap2
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.4
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: null
+            },
+            lightPosition: {
+                type: "3f",
+                value: null
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            alphaValue: {
+                type: "1f",
+                value: .4
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            animationParam3: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 0
             }
-        });
-    }
+        }
+    });
 
     //Create Environment Sphere
     envSphere = new THREE.Mesh(
@@ -1140,10 +972,10 @@ function init() {
                 if (child instanceof THREE.Mesh) {
                     child.scale.set(0.15, 0.15, 0.15);
                     if (i == 0) {
-                        child.material = useShader ? lCrystalShader1 : lCrystalMaterial1;
+                        child.material = lCrystalShader1;
                     }
                     if (i == 1) {
-                        child.material = useShader ? lCrystalShader2 : lCrystalMaterial2;
+                        child.material = lCrystalShader2;
                     }
                 }
             });
@@ -1160,16 +992,16 @@ function init() {
                 if (child instanceof THREE.Mesh) {
                     child.scale.set(0.05, 0.05, 0.05);
                     if (i == 0 || i == 1) {
-                        child.material = useShader ? sCrystalShader1 : sCrystalMaterial1;
+                        child.material = sCrystalShader1;
                     }
                     if (i == 2 || i == 3) {
-                        child.material = useShader ? sCrystalShader2 : sCrystalMaterial2;
+                        child.material = sCrystalShader2;
                     }
                     if (i == 4 || i == 5) {
-                        child.material = useShader ? sCrystalShader3 : sCrystalMaterial3;
+                        child.material = sCrystalShader3;
                     }
                     if (i > 5) {
-                        child.material = useShader ? sCrystalShader4 : sCrystalMaterial4;
+                        child.material = sCrystalShader4;
                     }
                 }
             })
@@ -1354,7 +1186,7 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    // composer.reset();
+    composer.reset();
 }
 
 function animate() {
@@ -1367,13 +1199,13 @@ function partialCrystalUpdate(time, texture, pos) {
         if (partialCrystals[i]) {
             partialCrystals[i].traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 1000;
+                    child.material.uniforms.time.value = time + 2000;
                     child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = 0.8;
+                    child.material.uniforms.alphaValue.value = 1;
                     child.material.uniforms.envMapIntensity.value = 1;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld)
-                    child.material.uniforms["animationParam1"].value = 1;
+                    child.material.uniforms["animationParam1"].value = 2;
                     child.material.uniforms["animationParam2"].value = animationParam2.value;
                     child.material.uniforms.lightValueParam.value = lightValueParam.value;
                     child.material.uniforms.radius = distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
@@ -1389,9 +1221,9 @@ function partial2CrystalUpdate(time, texture, pos) {
         if (partial2Crystals[i]) {
             partial2Crystals[i].traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 1000;
+                    child.material.uniforms.time.value = time + 2000;
                     child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = 0.8;
+                    child.material.uniforms.alphaValue.value = 1;
                     child.material.uniforms.envMapIntensity.value = 1;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
@@ -1410,13 +1242,13 @@ function logoCrystalUpdate(time, texture, pos) {
     if (logoCrystal) {
         logoCrystal.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-                child.material.uniforms.time.value = time + 1000;
+                child.material.uniforms.time.value = time + 2000;
                 child.material.uniforms.envMap.value = texture;
-                child.material.uniforms.alphaValue.value = 0.8;
+                child.material.uniforms.alphaValue.value = 1;
                 child.material.uniforms.envMapIntensity.value = 1;
                 child.material.uniforms.lightPosition.value = pos;
                 child.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld)
-                child.material.uniforms["animationParam1"].value = 1;
+                child.material.uniforms["animationParam1"].value = 2;
                 child.material.uniforms["animationParam2"].value = animationParam2.value;
                 child.material.uniforms.lightValueParam.value = lightValueParam.value;
                 child.material.needsUpdate = true;
@@ -1463,30 +1295,26 @@ function render() {
     let time = (new Date).getTime() - startTime;
     let t = time / 180 * Math.PI / 20;
 
-    if (useShader) {
-        lightPosition.x = 150 * Math.cos(t);
-        lightPosition.z = 150 * Math.sin(t);
+    lightPosition.x = 150 * Math.cos(t);
+    lightPosition.z = 150 * Math.sin(t);
 
-        if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear) {
-            partial2CrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-            logoCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-        }
-        else
-            partialCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-
-        cubeCamera2.update(renderer, scene);
-        cubeCamera2.renderTarget.texture.needsUpdate = true;
-        if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear) {
-            partial2CrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-            logoCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-        }
-        else
-            partialCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
-        cubeCamera1.update(renderer, scene);
-        cubeCamera1.renderTarget.texture.needsUpdate = true;
+    if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear) {
+        partial2CrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
+        logoCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
     }
+    else
+        partialCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
 
-
+    cubeCamera2.update(renderer, scene);
+    cubeCamera2.renderTarget.texture.needsUpdate = true;
+    if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear) {
+        partial2CrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
+        logoCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
+    }
+    else
+        partialCrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
+    cubeCamera1.update(renderer, scene);
+    cubeCamera1.renderTarget.texture.needsUpdate = true;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Animation
@@ -1583,17 +1411,7 @@ function render() {
 
                             }
                         });
-                        //Change Material
-                        if (!useShader) {
-                            partCrystal.traverse(function (child) {
-                                if (child instanceof THREE.Mesh) {
-                                    TweenMax.to(child.material, 1.5, {
-                                        ease: Power1.easeIn,
-                                        envMapIntensity: 20,
-                                    });
-                                }
-                            });
-                        }
+
                         idx++;
                     });
                     TweenMax.to(animationParam2, 2, {
@@ -1649,17 +1467,7 @@ function render() {
 
                         }
                     });
-                    //Change Material
-                    if (!useShader) {
-                        partCrystal.traverse(function (child) {
-                            if (child instanceof THREE.Mesh) {
-                                TweenMax.to(child.material, 0.5, {
-                                    ease: Power1.easeIn,
-                                    envMapIntensity: useTsu ? 1 : 5.3,
-                                });
-                            }
-                        });
-                    }
+
                     idx++;
                 });
                 TweenMax.to(animationParam2, 2, {
@@ -1698,17 +1506,7 @@ function render() {
                         onUpdate() {
                         }
                     });
-                    //Change Material
-                    if (!useShader) {
-                        partCrystal.traverse(function (child) {
-                            if (child instanceof THREE.Mesh) {
-                                TweenMax.to(child.material, 0.5, {
-                                    ease: Power1.easeIn,
-                                    envMapIntensity: 1000,
-                                });
-                            }
-                        });
-                    }
+
 
 
                 });
@@ -1754,16 +1552,6 @@ function render() {
 
                     }
                 });
-                //Return Crystal Material
-                if (!useShader) {
-                    TweenMax.to(logoCrystal.children[0].material, 0.7, {
-                        ease: Power3.easeOut,
-                        envMapIntensity: 3.3,
-                    });
-
-                }
-
-
 
                 let idx = 0;
                 partial2Crystals.forEach(part2Crystal => {
@@ -1787,17 +1575,7 @@ function render() {
 
                         }
                     });
-                    //Change Material
-                    if (!useShader) {
-                        part2Crystal.traverse(function (child) {
-                            if (child instanceof THREE.Mesh) {
-                                TweenMax.to(child.material, 0.5, {
-                                    ease: Power1.easeIn,
-                                    envMapIntensity: useTsu ? 1 : 5.3,
-                                });
-                            }
-                        });
-                    }
+
                     idx++;
                 });
 
@@ -1981,17 +1759,6 @@ function render() {
 
                         }
                     });
-                    //Change Material
-                    if (!useShader) {
-                        part2Crystal.traverse(function (child) {
-                            if (child instanceof THREE.Mesh) {
-                                TweenMax.to(child.material, 0.5, {
-                                    ease: Power1.easeIn,
-                                    envMapIntensity: useTsu ? 1 : 5.3,
-                                });
-                            }
-                        });
-                    }
 
                     idx++;
                 });
@@ -2041,5 +1808,5 @@ function render() {
     envSphere.visible = false;
 
     renderer.render(scene, camera);
-    // composer.render(0.01);
+    composer.render(0.01);
 }
