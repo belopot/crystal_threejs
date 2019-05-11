@@ -63,7 +63,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var partialCrystalParent;
-var partialCrystalCount = 156;
+var partialCrystalCount = 146;
 
 var partial2Crystals = [];
 var partial2CrystalRoots = [];
@@ -71,7 +71,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 56;
+var partial2CrystalCount = 47;
 
 var totalRoot;
 
@@ -111,7 +111,7 @@ var envSphere;
 var lightPosition = new THREE.Vector3(0, 0, 0);
 var startTime;
 var lightValueParam = {
-    value: 1
+    value: 10000
 };
 
 var animationParam2 = {
@@ -151,9 +151,10 @@ var State = {
 var currentState = State.Laround;
 
 // Effect
-var expShader, ringShader;
-var expTextures, ringTextures;
-var expMesh, ringMesh;
+var expShader, shineShader, ringShader;
+var expTextures, shineTextures, ringTexture;
+var expMesh, shineMesh, ringMesh1, ringMesh2, ringMesh3;
+var ringMat;
 var startEffect = false;
 var expTimer = 0;
 var ringTimer = 0;
@@ -200,13 +201,13 @@ function init() {
         //Scene
         //////////////////////////////////////////////////////////////////////////////////////////////
         scene = new THREE.Scene();
-        // scene.background = new THREE.Color(0x000b1b);
+        scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -316,8 +317,6 @@ function init() {
             partialCrystalAngleSpeeds.push(partialCrystalAngleSpeed);
         }
 
-
-
         //clone partial2 crystal
         partial2CrystalParent = new THREE.Object3D();
         totalRoot.add(partial2CrystalParent);
@@ -388,15 +387,39 @@ function init() {
         expMesh.visible = false;
         cameraRoot.add(expMesh);
 
-        let ringGeo = new THREE.CircleGeometry(12, 30);
-        let ringBGeo = new THREE.BufferGeometry();
-        ringBGeo.fromGeometry(ringGeo);
-        var ringMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
-        ringMesh = new THREE.Mesh(ringBGeo, ringMaterial);
-        ringMesh.position.set(-80, 0, 0);
-        ringMesh.rotation.set(0, Math.PI / 2, 0);
-        ringMesh.visible = false;
-        cameraRoot.add(ringMesh);
+        let shineGeo = new THREE.CircleGeometry(12, 30);
+        let shineBGeo = new THREE.BufferGeometry();
+        shineBGeo.fromGeometry(shineGeo);
+        var shineMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
+        shineMesh = new THREE.Mesh(shineBGeo, shineMaterial);
+        shineMesh.position.set(-80, 0, 0);
+        shineMesh.rotation.set(0, Math.PI / 2, 0);
+        shineMesh.visible = false;
+        cameraRoot.add(shineMesh);
+
+        
+        let ringGeo = new THREE.TorusBufferGeometry(150, 0.4, 16, 100);
+        ringMat = new THREE.MeshBasicMaterial({ color: 0x10e2b1, opacity: 1, transparent : true });
+        ringMesh1 = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh1.position.set(0, 0, 0);
+        ringMesh1.rotation.set(Math.PI / 15, Math.PI / 4, 0);
+        ringMesh1.scale.set(0.001, 0.001, 0.001);
+        ringMesh1.visible = false;
+        cameraRoot.add(ringMesh1);
+
+        ringMesh2 = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh2.position.set(0, -10, 0);
+        ringMesh2.rotation.set(-Math.PI/3, Math.PI/0.8, 0);
+        ringMesh2.scale.set(0.001, 0.001, 0.001);
+        ringMesh2.visible = false;
+        cameraRoot.add(ringMesh2);
+
+        ringMesh3 = new THREE.Mesh(ringGeo, ringMat);
+        ringMesh3.position.set(0, 0, 0);
+        ringMesh3.rotation.set(Math.PI/2, Math.PI/12, 0);
+        ringMesh3.scale.set(0.001, 0.001, 0.001);
+        ringMesh3.visible = false;
+        cameraRoot.add(ringMesh3); 
 
     };
 
@@ -422,14 +445,15 @@ function init() {
         let txt = textureLoader.load(effectPath + "exp/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
         expTextures.push(txt);
     }
-    ringTextures = [];
+    shineTextures = [];
     for (let i = 0; i < 76; i++) {
-        let txt = textureLoader.load(effectPath + "ring/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
-        ringTextures.push(txt);
+        let txt = textureLoader.load(effectPath + "shine/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
+        shineTextures.push(txt);
     }
+    ringTexture = textureLoader.load(effectPath + "ring.jpg");
 
     var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
-    var envFileName = "env5"
+    var envFileName = "env1"
     envMap = textureLoader.load(texturePath + "env/" + envFileName + ".jpg");
     sCrystalDiffuseMap1 = textureLoader.load(texturePath + "small/diffuse1.jpg");
     sCrystalAlphaMap1 = textureLoader.load(texturePath + "small/alpha1.jpg");
@@ -850,7 +874,7 @@ function init() {
             },
             bumpRefraction: {
                 type: "1f",
-                value: 1
+                value: 0.2
             },
             alphaValue: {
                 type: "1f",
@@ -922,7 +946,7 @@ function init() {
             },
             bumpRefraction: {
                 type: "1f",
-                value: 1
+                value: 0.2
             },
             alphaValue: {
                 type: "1f",
@@ -947,9 +971,11 @@ function init() {
         }
     });
 
+
+
     //Create Environment Sphere
     envSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(250, 32, 16),
+        new THREE.SphereGeometry(250, 64, 64),
         new THREE.MeshBasicMaterial({
             map: textureLoader.load(texturePath + "env/" + envFileName + ".jpg"),
             side: THREE.DoubleSide,
@@ -1269,8 +1295,8 @@ function expUpdate(texture) {
 }
 
 function ringUpdate(texture) {
-    if (ringMesh) {
-        ringMesh.traverse(function (child) {
+    if (shineMesh) {
+        shineMesh.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material.map = texture;
                 child.material.needsUpdate = true;
@@ -1291,12 +1317,13 @@ function render() {
     //Shader
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    envSphere.rotation.y += Math.PI / 180 / 10;
+    envSphere.rotation.y -= Math.PI / 180 / 8;
     let time = (new Date).getTime() - startTime;
     let t = time / 180 * Math.PI / 20;
 
-    lightPosition.x = 150 * Math.cos(t);
-    lightPosition.z = 150 * Math.sin(t);
+    lightPosition.x = 50 * Math.cos(t);
+    lightPosition.y = 50 * Math.sin(t);
+    lightPosition.z = 50 * Math.sin(t);
 
     if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear) {
         partial2CrystalUpdate(time, cubeCamera1.renderTarget.texture, lightPosition);
@@ -1414,11 +1441,6 @@ function render() {
 
                         idx++;
                     });
-                    TweenMax.to(animationParam2, 2, {
-                        ease: Sine.easeInOut,
-                        value: 0.6,
-                    });
-                    lightValueParam.value = 10000;
                 }
 
             }
@@ -1474,7 +1496,6 @@ function render() {
                     ease: Sine.easeInOut,
                     value: 1,
                 });
-                lightValueParam.value = 1;
             }
             if (autoCreate)
                 isMouseDown = false;
@@ -1514,7 +1535,6 @@ function render() {
                     ease: Power1.easeOut,
                     value: 0.1,
                 });
-                lightValueParam.value = 10000;
             }
             //Hide holder
             holderContainer.classList.add("hidden");
@@ -1530,7 +1550,7 @@ function render() {
                 expTimer = 0;
                 ringTimer = 0;
                 expMesh.visible = true;
-                ringMesh.visible = true;
+                shineMesh.visible = true;
                 logoCrystal = logoCrystals[logoCrystalIdx];
 
                 logoCrystal.visible = true;
@@ -1582,6 +1602,48 @@ function render() {
                 TweenMax.to(animationParam2, 3, {
                     ease: Power1.easeOut,
                     value: 1,
+                });
+
+                ringMesh1.visible = true;
+                ringMesh2.visible = true;
+                ringMesh3.visible = true;
+                ringMat.opacity = 1;
+                TweenMax.to(ringMesh1.scale, 7, {
+                    ease: Power1.easeOut,
+                    x: 1,
+                    y: 2,
+                    z: 1,
+                    onComplete() {
+                        ringMesh1.visible = false;
+                        ringMesh1.scale.set(0.001,0.001,0.001);
+                    }
+                });
+
+                TweenMax.to(ringMesh2.scale, 5, {
+                    ease: Power1.easeOut,
+                    x: 1,
+                    y: 2,
+                    z: 1,
+                    onComplete() {
+                        ringMesh2.visible = false;
+                        ringMesh2.scale.set(0.001,0.001,0.001);
+                    }
+                });
+
+                TweenMax.to(ringMesh3.scale, 3, {
+                    ease: Power1.easeOut,
+                    x: 1,
+                    y: 1,
+                    z: 1,
+                    onComplete() {
+                        ringMesh3.visible = false;
+                        ringMesh3.scale.set(0.001,0.001,0.001);
+                    }
+                });
+
+                TweenMax.to(ringMat, 5, {
+                    ease: Power1.easeOut,
+                    opacity: 0
                 });
 
             }
@@ -1650,7 +1712,7 @@ function render() {
                         let sy = 0.01;
                         let sz = 0.01;
                         TweenMax.killTweensOf(part2Crystal);
-                        TweenMax.to(part2Crystal.position, 1, {
+                        TweenMax.to(part2Crystal.position, 1.2, {
                             ease: Expo.easeIn,
                             x: rx,
                             y: ry,
@@ -1662,7 +1724,7 @@ function render() {
 
                             }
                         });
-                        TweenMax.to(part2Crystal.scale, 1, {
+                        TweenMax.to(part2Crystal.scale, 1.2, {
                             ease: Expo.easeIn,
                             x: sx,
                             y: sy,
@@ -1678,13 +1740,18 @@ function render() {
                     });
 
                     TweenMax.killTweensOf(logoCrystal);
-                    TweenMax.to(logoCrystal.scale, 1, {
+                    TweenMax.to(logoCrystal.scale, 1.2, {
                         ease: Expo.easeIn,
                         x: 0.01,
                         y: 0.01,
                         z: 0.01,
                     });
                     downTimer = 0;
+
+                    TweenMax.to(animationParam2, 1, {
+                        ease: Expo.easeIn,
+                        value: 0.1
+                    });
                 }
             }
 
@@ -1731,6 +1798,10 @@ function render() {
                         });
                         idx++;
                     });
+                    TweenMax.to(animationParam2, 1.5, {
+                        ease: Expo.easeOut,
+                        value: 1
+                    });
                 }
             }
             else {
@@ -1770,6 +1841,10 @@ function render() {
                     y: 1,
                     z: 1,
                 });
+                TweenMax.to(animationParam2, 1.5, {
+                    ease: Expo.easeOut,
+                    value: 1
+                });
             }
             break;
         case State.Partial:
@@ -1786,14 +1861,14 @@ function render() {
 
     if (startEffect) {
         expUpdate(expTextures[Math.floor(expTimer)]);
-        ringUpdate(ringTextures[Math.floor(ringTimer)]);
+        ringUpdate(shineTextures[Math.floor(ringTimer)]);
         expTimer += delta * 2.5;
         ringTimer += delta * 2.75;
 
-        if (expTimer > expTextures.length || ringTimer > ringTextures.length) {
+        if (expTimer > expTextures.length || ringTimer > shineTextures.length) {
             startEffect = false;
             expMesh.visible = false;
-            ringMesh.visible = false;
+            shineMesh.visible = false;
             TweenMax.killTweensOf(logoCrystal);
             TweenMax.to(logoCrystal.position, 1, {
                 x: 0,
