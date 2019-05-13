@@ -71,7 +71,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 47;
+var partial2CrystalCount = 57;
 
 var totalRoot;
 
@@ -111,16 +111,19 @@ var envSphere;
 var lightPosition = new THREE.Vector3(0, 0, 0);
 var startTime;
 var lightValueParam = {
-    value: 10000
+    value: 9000
 };
 
-var animationParam2 = {
+var brightnessValue = {
     value: 1
+}
+
+var vibrateValue = {
+    value: 0
 }
 
 //Gather mesh
 var downTimer = 0;
-var vibrateStartTime = 0;
 var accelTimerForRootAngle = 0;
 
 var State = {
@@ -202,12 +205,13 @@ function init() {
         //////////////////////////////////////////////////////////////////////////////////////////////
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000b1b);
-        // scene.background = new THREE.Color(0x0505ff);
+        scene.background = new THREE.Color(0x0505ff);
+        scene.background = new THREE.Color(0x0c1745);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -219,7 +223,7 @@ function init() {
         //////////////////////////////////////////////////////////////////////////////////////////////
         camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 300);
         camera.position.x = -135;
-        camera.position.y = 0;
+        camera.position.y = -12;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         cameraRoot = new THREE.Object3D();
         cameraRoot.add(camera);
@@ -330,11 +334,11 @@ function init() {
 
             let alpha = 2 * Math.PI * getRandom();
 
-            let ua = getRandomScale(14, 100);
+            let ua = getRandomScale(9, 89);
 
             let rx = symbolX * ua * Math.cos(alpha);
             let rz = symbolY * ua * Math.sin(alpha);
-            let ry = getRandomScale(-35, 35);
+            let ry = getRandomScale(-30, 30);
 
             let partial2Crystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partial2Crystal.visible = false;
@@ -381,7 +385,7 @@ function init() {
         expBGeo.fromGeometry(expGeo);
         var expMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
         expMesh = new THREE.Mesh(expBGeo, expMaterial);
-        expMesh.position.set(-120, 0, 0);
+        expMesh.position.set(-120, camera.position.y * 0.9, 0);
         expMesh.rotation.set(0, Math.PI / 2, 0);
 
         expMesh.visible = false;
@@ -392,14 +396,14 @@ function init() {
         shineBGeo.fromGeometry(shineGeo);
         var shineMaterial = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, transparent: true });
         shineMesh = new THREE.Mesh(shineBGeo, shineMaterial);
-        shineMesh.position.set(-80, 0, 0);
+        shineMesh.position.set(-80, camera.position.y * 0.7, 0);
         shineMesh.rotation.set(0, Math.PI / 2, 0);
         shineMesh.visible = false;
         cameraRoot.add(shineMesh);
 
-        
+
         let ringGeo = new THREE.TorusBufferGeometry(150, 0.4, 16, 100);
-        ringMat = new THREE.MeshBasicMaterial({ color: 0x10e2b1, opacity: 1, transparent : true });
+        ringMat = new THREE.MeshBasicMaterial({ color: 0x10e2b1, opacity: 1, transparent: true });
         ringMesh1 = new THREE.Mesh(ringGeo, ringMat);
         ringMesh1.position.set(0, 0, 0);
         ringMesh1.rotation.set(Math.PI / 15, Math.PI / 4, 0);
@@ -409,17 +413,17 @@ function init() {
 
         ringMesh2 = new THREE.Mesh(ringGeo, ringMat);
         ringMesh2.position.set(0, -10, 0);
-        ringMesh2.rotation.set(-Math.PI/3, Math.PI/0.8, 0);
+        ringMesh2.rotation.set(-Math.PI / 3, Math.PI / 0.8, 0);
         ringMesh2.scale.set(0.001, 0.001, 0.001);
         ringMesh2.visible = false;
         cameraRoot.add(ringMesh2);
 
         ringMesh3 = new THREE.Mesh(ringGeo, ringMat);
         ringMesh3.position.set(0, 0, 0);
-        ringMesh3.rotation.set(Math.PI/2, Math.PI/12, 0);
+        ringMesh3.rotation.set(Math.PI / 2, Math.PI / 12, 0);
         ringMesh3.scale.set(0.001, 0.001, 0.001);
         ringMesh3.visible = false;
-        cameraRoot.add(ringMesh3); 
+        cameraRoot.add(ringMesh3);
 
     };
 
@@ -453,7 +457,7 @@ function init() {
     ringTexture = textureLoader.load(effectPath + "ring.jpg");
 
     var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
-    var envFileName = "env1"
+    var envFileName = "env5"
     envMap = textureLoader.load(texturePath + "env/" + envFileName + ".jpg");
     sCrystalDiffuseMap1 = textureLoader.load(texturePath + "small/diffuse1.jpg");
     sCrystalAlphaMap1 = textureLoader.load(texturePath + "small/alpha1.jpg");
@@ -514,7 +518,7 @@ function init() {
             },
             envMapIntensity: {
                 type: "1f",
-                value: 0.1
+                value: 0.5
             },
             normalMap: {
                 type: "t",
@@ -598,7 +602,7 @@ function init() {
             },
             envMapIntensity: {
                 type: "1f",
-                value: 0.1
+                value: 0.5
             },
             normalMap: {
                 type: "t",
@@ -682,7 +686,7 @@ function init() {
             },
             envMapIntensity: {
                 type: "1f",
-                value: 0.1
+                value: 0.5
             },
             normalMap: {
                 type: "t",
@@ -766,7 +770,7 @@ function init() {
             },
             envMapIntensity: {
                 type: "1f",
-                value: 0.1
+                value: 0.5
             },
             normalMap: {
                 type: "t",
@@ -874,7 +878,7 @@ function init() {
             },
             bumpRefraction: {
                 type: "1f",
-                value: 0.2
+                value: 1
             },
             alphaValue: {
                 type: "1f",
@@ -946,7 +950,7 @@ function init() {
             },
             bumpRefraction: {
                 type: "1f",
-                value: 0.2
+                value: 1
             },
             alphaValue: {
                 type: "1f",
@@ -1228,13 +1232,12 @@ function partialCrystalUpdate(time, texture, pos) {
                     child.material.uniforms.time.value = time + 2000;
                     child.material.uniforms.envMap.value = texture;
                     child.material.uniforms.alphaValue.value = 1;
-                    child.material.uniforms.envMapIntensity.value = 1;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld)
                     child.material.uniforms["animationParam1"].value = 2;
-                    child.material.uniforms["animationParam2"].value = animationParam2.value;
+                    child.material.uniforms["animationParam2"].value = brightnessValue.value;
                     child.material.uniforms.lightValueParam.value = lightValueParam.value;
-                    child.material.uniforms.radius = distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
+                    child.material.uniforms.radius = 0;// distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
                     child.material.needsUpdate = true;
                 }
             });
@@ -1250,13 +1253,12 @@ function partial2CrystalUpdate(time, texture, pos) {
                     child.material.uniforms.time.value = time + 2000;
                     child.material.uniforms.envMap.value = texture;
                     child.material.uniforms.alphaValue.value = 1;
-                    child.material.uniforms.envMapIntensity.value = 1;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
                     child.material.uniforms["animationParam1"].value = 1;
-                    child.material.uniforms["animationParam2"].value = animationParam2.value;
+                    child.material.uniforms["animationParam2"].value = brightnessValue.value;
                     child.material.uniforms.lightValueParam.value = lightValueParam.value;
-                    child.material.uniforms.radius = distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
+                    child.material.uniforms.radius = 0;// distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
                     child.material.needsUpdate = true;
                 }
             });
@@ -1265,17 +1267,17 @@ function partial2CrystalUpdate(time, texture, pos) {
 }
 
 function logoCrystalUpdate(time, texture, pos) {
-    if (logoCrystal) {
+    if (logoCrystal != null) {
         logoCrystal.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material.uniforms.time.value = time + 2000;
                 child.material.uniforms.envMap.value = texture;
                 child.material.uniforms.alphaValue.value = 1;
-                child.material.uniforms.envMapIntensity.value = 1;
                 child.material.uniforms.lightPosition.value = pos;
-                child.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld)
+                child.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld);
                 child.material.uniforms["animationParam1"].value = 2;
-                child.material.uniforms["animationParam2"].value = animationParam2.value;
+                child.material.uniforms["animationParam2"].value = brightnessValue.value;
+                child.material.uniforms["animationParam3"].value = vibrateValue.value;
                 child.material.uniforms.lightValueParam.value = lightValueParam.value;
                 child.material.needsUpdate = true;
             }
@@ -1310,7 +1312,6 @@ function render() {
         return;
 
     // camera.updateMatrixWorld();
-
 
     envSphere.visible = true;
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1359,11 +1360,8 @@ function render() {
                 partial2Crystals[i].rotation.x += partial2CrystalAngleSpeeds[i].x / 540;
                 partial2Crystals[i].rotation.y += partial2CrystalAngleSpeeds[i].y / 540;
                 partial2Crystals[i].rotation.z += partial2CrystalAngleSpeeds[i].z / 540;
-
             }
         }
-
-
     }
 
     //Partial Crystal Animation
@@ -1373,7 +1371,6 @@ function render() {
             partialCrystals[i].rotation.x += partialCrystalAngleSpeeds[i].x / 360;
             partialCrystals[i].rotation.y += partialCrystalAngleSpeeds[i].y / 360;
             partialCrystals[i].rotation.z += partialCrystalAngleSpeeds[i].z / 360;
-
         }
 
         //Rotate world space
@@ -1387,9 +1384,9 @@ function render() {
                 accelTimerForRootAngle += isMobile ? 0.00001 : 0.000001;
                 let a = 0.0001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 3600 + a;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 3600 + a;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 3600 + a;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 4000 + a;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 4000 + a;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 4000 + a;
             }
         }
     }
@@ -1418,31 +1415,17 @@ function render() {
                             ease: Sine.easeInOut,
                             x: rx,
                             y: ry,
-                            z: rz,
-                            onComplete() {
-                                // currentState = State.Saround;
-                            },
-                            onUpdate() {
-
-                            }
+                            z: rz
                         });
                         TweenMax.to(partCrystal.scale, 2, {
                             ease: Sine.easeInOut,
                             x: sx,
                             y: sy,
-                            z: sz,
-                            onComplete() {
-                                // currentState = State.Saround;
-                            },
-                            onUpdate() {
-
-                            }
+                            z: sz
                         });
-
                         idx++;
                     });
                 }
-
             }
             else {
                 downTimer -= delta;
@@ -1477,22 +1460,20 @@ function render() {
                         z: initPositionOfPartialCrystals[idx].z,
                         ease: Expo.easeOut
                     });
-                    TweenMax.to(partCrystal.scale, 2, {
-                        ease: Sine.easeInOut,
+                    TweenMax.to(partCrystal.scale, 1.5, {
                         x: initScaleOfPartialCrystals[idx].x,
                         y: initScaleOfPartialCrystals[idx].y,
                         z: initScaleOfPartialCrystals[idx].z,
+                        ease: Expo.easeOut,
                         onComplete() {
-                            // currentState = State.Saround;
                         },
                         onUpdate() {
-
                         }
                     });
 
                     idx++;
                 });
-                TweenMax.to(animationParam2, 2, {
+                TweenMax.to(brightnessValue, 2, {
                     ease: Sine.easeInOut,
                     value: 1,
                 });
@@ -1522,16 +1503,12 @@ function render() {
                         y: 0,
                         z: 0,
                         onComplete() {
-
                         },
                         onUpdate() {
                         }
                     });
-
-
-
                 });
-                TweenMax.to(animationParam2, 0.7, {
+                TweenMax.to(brightnessValue, 0.7, {
                     ease: Power1.easeOut,
                     value: 0.1,
                 });
@@ -1552,7 +1529,6 @@ function render() {
                 expMesh.visible = true;
                 shineMesh.visible = true;
                 logoCrystal = logoCrystals[logoCrystalIdx];
-
                 logoCrystal.visible = true;
                 logoCrystal.rotation.set(0, 0, 0);
                 totalRoot.rotation.set(0, Math.PI * 3.3 / 5 + Math.PI / 2, 0);
@@ -1565,11 +1541,8 @@ function render() {
                     y: 1,
                     z: 1,
                     onComplete() {
-                        // currentState = State.Saround;
-
                     },
                     onUpdate() {
-
                     }
                 });
 
@@ -1589,17 +1562,14 @@ function render() {
                         y: initScaleOfPartial2Crystals[idx].y,
                         z: initScaleOfPartial2Crystals[idx].z,
                         onComplete() {
-                            // currentState = State.Saround;
                         },
                         onUpdate() {
-
                         }
                     });
-
                     idx++;
                 });
 
-                TweenMax.to(animationParam2, 3, {
+                TweenMax.to(brightnessValue, 3, {
                     ease: Power1.easeOut,
                     value: 1,
                 });
@@ -1615,7 +1585,7 @@ function render() {
                     z: 1,
                     onComplete() {
                         ringMesh1.visible = false;
-                        ringMesh1.scale.set(0.001,0.001,0.001);
+                        ringMesh1.scale.set(0.001, 0.001, 0.001);
                     }
                 });
 
@@ -1626,7 +1596,7 @@ function render() {
                     z: 1,
                     onComplete() {
                         ringMesh2.visible = false;
-                        ringMesh2.scale.set(0.001,0.001,0.001);
+                        ringMesh2.scale.set(0.001, 0.001, 0.001);
                     }
                 });
 
@@ -1637,7 +1607,7 @@ function render() {
                     z: 1,
                     onComplete() {
                         ringMesh3.visible = false;
-                        ringMesh3.scale.set(0.001,0.001,0.001);
+                        ringMesh3.scale.set(0.001, 0.001, 0.001);
                     }
                 });
 
@@ -1675,29 +1645,24 @@ function render() {
             if (isMouseDown) {
                 if (pickLogo) {
                     downTimer += delta;
-
                     if (downTimer > State.times[currentState].value) {
                         currentState = State.LogoGather;
-                        vibrateStartTime = t;
-
                     }
                 }
-
             }
             else {
                 pickLogo = false;
                 downTimer -= delta;
                 if (downTimer < 0)
                     downTimer = 0;
+
             }
             break;
 
         case State.LogoGather:
             if (isMouseDown) {
                 //Vibrate
-                logoCrystal.position.x = 0.5 * Math.sin((t - vibrateStartTime) * 120.0);
-                logoCrystal.position.y = 0.4 * Math.sin((t - vibrateStartTime) * 120.0);
-                logoCrystal.position.z = 0.5 * Math.sin((t - vibrateStartTime) * 120.0);
+                vibrateValue.value = 5;
 
                 downTimer += delta;
                 if (downTimer > State.times[currentState].value) {
@@ -1716,27 +1681,14 @@ function render() {
                             ease: Expo.easeIn,
                             x: rx,
                             y: ry,
-                            z: rz,
-                            onComplete() {
-                                // currentState = State.Saround;
-                            },
-                            onUpdate() {
-
-                            }
+                            z: rz
                         });
                         TweenMax.to(part2Crystal.scale, 1.2, {
                             ease: Expo.easeIn,
                             x: sx,
                             y: sy,
-                            z: sz,
-                            onComplete() {
-                                // currentState = State.Saround;
-                            },
-                            onUpdate() {
-
-                            }
+                            z: sz
                         });
-
                     });
 
                     TweenMax.killTweensOf(logoCrystal);
@@ -1745,16 +1697,24 @@ function render() {
                         x: 0.01,
                         y: 0.01,
                         z: 0.01,
+                        onComplete() {
+                            vibrateValue.value = 0;
+                        },
                     });
                     downTimer = 0;
 
-                    TweenMax.to(animationParam2, 1, {
+                    TweenMax.to(brightnessValue, 1, {
                         ease: Expo.easeIn,
                         value: 0.1
                     });
+
                 }
             }
-
+            else {
+                currentState = State.LogoAround;
+                downTimer = 0;
+                vibrateValue.value = 0;
+            }
             break;
         case State.LogoAppear:
             if (isMouseDown) {
@@ -1798,7 +1758,7 @@ function render() {
                         });
                         idx++;
                     });
-                    TweenMax.to(animationParam2, 1.5, {
+                    TweenMax.to(brightnessValue, 1.5, {
                         ease: Expo.easeOut,
                         value: 1
                     });
@@ -1824,10 +1784,8 @@ function render() {
                         y: initScaleOfPartial2Crystals[idx].y,
                         z: initScaleOfPartial2Crystals[idx].z,
                         onComplete() {
-                            // currentState = State.Saround;
                         },
                         onUpdate() {
-
                         }
                     });
 
@@ -1841,10 +1799,11 @@ function render() {
                     y: 1,
                     z: 1,
                 });
-                TweenMax.to(animationParam2, 1.5, {
+                TweenMax.to(brightnessValue, 1.5, {
                     ease: Expo.easeOut,
                     value: 1
                 });
+                vibrateValue.value = 0;
             }
             break;
         case State.Partial:
@@ -1853,7 +1812,6 @@ function render() {
                 downTimer = 0;
                 currentState = State.Laround;
             }
-
             break;
         default:
             break;
