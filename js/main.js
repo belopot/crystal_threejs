@@ -1,3 +1,5 @@
+//var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
+var assetPath = "Assets/";
 var container;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
 
@@ -9,37 +11,31 @@ var sCrystalShader4;
 var lCrystalShader1;
 var lCrystalShader2;
 
-var sCrystalDiffuseMap1;
 var sCrystalAlphaMap1;
 var sCrystalSpecularMap1;
 var sCrystalNormalMap1;
 var sCrystalBumpMap1;
 
-var sCrystalDiffuseMap2;
 var sCrystalAlphaMap2;
 var sCrystalSpecularMap2;
 var sCrystalNormalMap2;
 var sCrystalBumpMap2;
 
-var sCrystalDiffuseMap3;
 var sCrystalAlphaMap3;
 var sCrystalSpecularMap3;
 var sCrystalNormalMap3;
 var sCrystalBumpMap3;
 
-var sCrystalDiffuseMap4;
 var sCrystalAlphaMap4;
 var sCrystalSpecularMap4;
 var sCrystalNormalMap4;
 var sCrystalBumpMap4;
 
-var lCrystalDiffuseMap1;
 var lCrystalAlphaMap1;
 var lCrystalSpecularMap1;
 var lCrystalNormalMap1;
 var lCrystalBumpMap1;
 
-var lCrystalDiffuseMap2;
 var lCrystalAlphaMap2;
 var lCrystalSpecularMap2;
 var lCrystalNormalMap2;
@@ -101,8 +97,6 @@ var oldDownPosX = 0;
 var oldDownPosY = 0;
 var firstDown = true;
 
-var useTsu = false;
-
 var envMap;
 
 var sCrystalRadius;
@@ -157,10 +151,20 @@ var currentState = State.Laround;
 var expShader, shineShader, ringShader;
 var expTextures, shineTextures, ringTexture;
 var expMesh, shineMesh, ringMesh1, ringMesh2, ringMesh3;
+var invRing1, invRing2, invRing3, invRing4, invRing5, invRing6;
+var invRingMat;
 var ringMat;
 var startEffect = false;
 var expTimer = 0;
 var ringTimer = 0;
+
+var alphaTimer = {
+    min: 0.1,
+    max: 0.7,
+    step: 0.0006,
+    val: 0.5,
+    inc: true
+};
 
 function getRandomScale(low, high) {
     return getRandom() * (high - low) + low
@@ -204,8 +208,8 @@ function init() {
         //Scene
         //////////////////////////////////////////////////////////////////////////////////////////////
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000b1b);
-        scene.background = new THREE.Color(0x0505ff);
+        // scene.background = new THREE.Color(0x000b1b);
+        // scene.background = new THREE.Color(0x0505ff);
         scene.background = new THREE.Color(0x0c1745);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,6 +429,51 @@ function init() {
         ringMesh3.visible = false;
         cameraRoot.add(ringMesh3);
 
+
+        //Inv Ring
+        let invRingGeo = new THREE.TorusBufferGeometry(80, 0.4, 16, 100);
+        invRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 1, transparent: true });
+        invRing1 = new THREE.Mesh(invRingGeo, invRingMat);
+        invRing1.position.set(0, 0, 0);
+        invRing1.rotation.set(Math.PI / 15, Math.PI / 4, 0);
+        invRing1.scale.set(0.5, 0.5, 0.5);
+        invRing1.visible = true;
+        envSphere.add(invRing1);
+
+        invRing2 = new THREE.Mesh(invRingGeo, invRingMat);
+        invRing2.position.set(0, -10, 0);
+        invRing2.rotation.set(-Math.PI / 3, Math.PI / 0.8, 0);
+        // invRing2.scale.set(0.001, 0.001, 0.001);
+        invRing2.visible = true;
+        envSphere.add(invRing2);
+
+        invRing3 = new THREE.Mesh(invRingGeo, invRingMat);
+        invRing3.position.set(0, 0, 0);
+        invRing3.rotation.set(Math.PI / 9, Math.PI / 12, 0);
+        invRing3.scale.set(0.8, 0.8, 0.8);
+        invRing3.visible = true;
+        envSphere.add(invRing3);
+
+        invRing4 = new THREE.Mesh(invRingGeo, invRingMat);
+        invRing4.position.set(0, 0, 0);
+        invRing4.rotation.set(-Math.PI / 2, Math.PI / 12, 0);
+        invRing4.scale.set(1.5, 1.5, 1.5);
+        invRing4.visible = true;
+        envSphere.add(invRing4);
+
+        invRing5 = new THREE.Mesh(invRingGeo, invRingMat);
+        invRing5.position.set(0, 0, 0);
+        invRing5.rotation.set(Math.PI / 5, -Math.PI / 3, 0);
+        invRing5.scale.set(1.5, 1.5, 1.5);
+        invRing5.visible = true;
+        envSphere.add(invRing5);
+
+        invRing6 = new THREE.Mesh(new THREE.TorusBufferGeometry(50, 0.5, 16, 100), invRingMat);
+        invRing6.position.set(0, 0, 0);
+        invRing6.rotation.set(Math.PI / 2, Math.PI / 12, 0);
+        invRing6.visible = true;
+        envSphere.add(invRing6);
+
     };
 
 
@@ -443,7 +492,7 @@ function init() {
 
     var textureLoader = new THREE.TextureLoader(manager);
 
-    var effectPath = "Assets/effect/";
+    var effectPath = assetPath + "effect/";
     expTextures = [];
     for (let i = 0; i < 61; i++) {
         let txt = textureLoader.load(effectPath + "exp/" + "img" + ((i < 10) ? "0" + i : i) + ".png");
@@ -456,40 +505,34 @@ function init() {
     }
     ringTexture = textureLoader.load(effectPath + "ring.jpg");
 
-    var texturePath = useTsu ? "Assets/texture/tsu/" : "Assets/texture/";
+    var texturePath = assetPath + "texture/";
     var envFileName = "env5"
     envMap = textureLoader.load(texturePath + "env/" + envFileName + ".jpg");
-    sCrystalDiffuseMap1 = textureLoader.load(texturePath + "small/diffuse1.jpg");
     sCrystalAlphaMap1 = textureLoader.load(texturePath + "small/alpha1.jpg");
     sCrystalSpecularMap1 = textureLoader.load(texturePath + "small/specular1.jpg");
     sCrystalNormalMap1 = textureLoader.load(texturePath + "small/normal1.jpg");
     sCrystalBumpMap1 = textureLoader.load(texturePath + "small/bump1.jpg");
 
-    sCrystalDiffuseMap2 = textureLoader.load(texturePath + "small/diffuse2.jpg");
     sCrystalAlphaMap2 = textureLoader.load(texturePath + "small/alpha2.jpg");
     sCrystalSpecularMap2 = textureLoader.load(texturePath + "small/specular2.jpg");
     sCrystalNormalMap2 = textureLoader.load(texturePath + "small/normal2.jpg");
     sCrystalBumpMap2 = textureLoader.load(texturePath + "small/bump2.jpg");
 
-    sCrystalDiffuseMap3 = textureLoader.load(texturePath + "small/diffuse3.jpg");
     sCrystalAlphaMap3 = textureLoader.load(texturePath + "small/alpha3.jpg");
     sCrystalSpecularMap3 = textureLoader.load(texturePath + "small/specular3.jpg");
     sCrystalNormalMap3 = textureLoader.load(texturePath + "small/normal3.jpg");
     sCrystalBumpMap3 = textureLoader.load(texturePath + "small/bump3.jpg");
 
-    sCrystalDiffuseMap4 = textureLoader.load(texturePath + "small/diffuse4.jpg");
     sCrystalAlphaMap4 = textureLoader.load(texturePath + "small/alpha4.jpg");
     sCrystalSpecularMap4 = textureLoader.load(texturePath + "small/specular4.jpg");
     sCrystalNormalMap4 = textureLoader.load(texturePath + "small/normal4.jpg");
     sCrystalBumpMap4 = textureLoader.load(texturePath + "small/bump4.jpg");
 
-    lCrystalDiffuseMap1 = textureLoader.load(texturePath + "logo/diffuse1.jpg");
     lCrystalAlphaMap1 = textureLoader.load(texturePath + "logo/alpha1.jpg");
     lCrystalSpecularMap1 = textureLoader.load(texturePath + "logo/specular1.jpg");
     lCrystalNormalMap1 = textureLoader.load(texturePath + "logo/normal1.jpg");
     lCrystalBumpMap1 = textureLoader.load(texturePath + "logo/bump1.jpg");
 
-    lCrystalDiffuseMap2 = textureLoader.load(texturePath + "logo/diffuse2.jpg");
     lCrystalAlphaMap2 = textureLoader.load(texturePath + "logo/alpha2.jpg");
     lCrystalSpecularMap2 = textureLoader.load(texturePath + "logo/specular2.jpg");
     lCrystalNormalMap2 = textureLoader.load(texturePath + "logo/normal2.jpg");
@@ -500,10 +543,6 @@ function init() {
         fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
         transparent: true,
         uniforms: {
-            map: {
-                type: "t",
-                value: sCrystalDiffuseMap1
-            },
             alphaMap: {
                 type: "t",
                 value: sCrystalAlphaMap1
@@ -566,7 +605,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -584,10 +623,6 @@ function init() {
         fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
         transparent: true,
         uniforms: {
-            map: {
-                type: "t",
-                value: sCrystalDiffuseMap2
-            },
             alphaMap: {
                 type: "t",
                 value: sCrystalAlphaMap2
@@ -650,7 +685,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -668,10 +703,6 @@ function init() {
         fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
         transparent: true,
         uniforms: {
-            map: {
-                type: "t",
-                value: sCrystalDiffuseMap3
-            },
             alphaMap: {
                 type: "t",
                 value: sCrystalAlphaMap3
@@ -734,7 +765,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -752,10 +783,6 @@ function init() {
         fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
         transparent: true,
         uniforms: {
-            map: {
-                type: "t",
-                value: sCrystalDiffuseMap4
-            },
             alphaMap: {
                 type: "t",
                 value: sCrystalAlphaMap4
@@ -818,7 +845,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -886,7 +913,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -958,7 +985,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 0
+                value: 100000000
             },
             animationParam2: {
                 type: "1f",
@@ -994,7 +1021,7 @@ function init() {
     totalRoot = new THREE.Object3D()
 
     //Load logo crystal model
-    var modelPath = useTsu ? "Assets/model/tsu/" : "Assets/model/";
+    var modelPath = assetPath + "model/";
     for (let i = 0; i < 2; i++) {
         new THREE.OBJLoader(manager).setPath(modelPath).load('logo' + (i + 1) + '.obj', function (object) {
             object.visible = false;
@@ -1229,12 +1256,11 @@ function partialCrystalUpdate(time, texture, pos) {
         if (partialCrystals[i]) {
             partialCrystals[i].traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 2000;
+                    child.material.uniforms.time.value = time + 150;
                     child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = 1;
+                    child.material.uniforms.alphaValue.value = alphaTimer.val;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld)
-                    child.material.uniforms["animationParam1"].value = 2;
                     child.material.uniforms["animationParam2"].value = brightnessValue.value;
                     child.material.uniforms.lightValueParam.value = lightValueParam.value;
                     child.material.uniforms.radius = 0;// distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
@@ -1250,12 +1276,11 @@ function partial2CrystalUpdate(time, texture, pos) {
         if (partial2Crystals[i]) {
             partial2Crystals[i].traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 2000;
+                    child.material.uniforms.time.value = time + 100;
                     child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = 1;
+                    child.material.uniforms.alphaValue.value = alphaTimer.val;
                     child.material.uniforms.lightPosition.value = pos;
                     child.material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
-                    child.material.uniforms["animationParam1"].value = 1;
                     child.material.uniforms["animationParam2"].value = brightnessValue.value;
                     child.material.uniforms.lightValueParam.value = lightValueParam.value;
                     child.material.uniforms.radius = 0;// distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
@@ -1270,12 +1295,11 @@ function logoCrystalUpdate(time, texture, pos) {
     if (logoCrystal != null) {
         logoCrystal.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-                child.material.uniforms.time.value = time + 2000;
+                child.material.uniforms.time.value = time + 100;
                 child.material.uniforms.envMap.value = texture;
-                child.material.uniforms.alphaValue.value = 1;
+                child.material.uniforms.alphaValue.value = alphaTimer.val;
                 child.material.uniforms.lightPosition.value = pos;
-                child.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld);
-                child.material.uniforms["animationParam1"].value = 2;
+                child.material.uniforms.matrixWorldInverse.value = logoCrystals[logoCrystalIdx].matrixWorld.getInverse(logoCrystals[logoCrystalIdx].matrixWorld);
                 child.material.uniforms["animationParam2"].value = brightnessValue.value;
                 child.material.uniforms["animationParam3"].value = vibrateValue.value;
                 child.material.uniforms.lightValueParam.value = lightValueParam.value;
@@ -1348,6 +1372,19 @@ function render() {
     //Animation
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     var delta = 5 * clock.getDelta();
+
+    if (alphaTimer.val > alphaTimer.max) {
+        alphaTimer.inc = false;
+    }
+    if (alphaTimer.val < alphaTimer.min) {
+        alphaTimer.inc = true;
+    }
+    if (alphaTimer.inc) {
+        alphaTimer.val += alphaTimer.step;
+    }
+    else {
+        alphaTimer.val -= alphaTimer.step;
+    }
 
     if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear || currentState == State.Partial) {
         //Logo Crystal Animation
