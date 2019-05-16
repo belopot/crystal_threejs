@@ -1,5 +1,5 @@
-//var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
-var assetPath = "Assets/";
+var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
+// var assetPath = "Assets/";
 var container;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
 
@@ -67,7 +67,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 57;
+var partial2CrystalCount = 48;
 
 var totalRoot;
 
@@ -136,8 +136,8 @@ var State = {
         2: { value: 15.0 },
         3: { value: 10.6 },
         4: { value: 1 },
-        5: { value: 4 },
-        6: { value: 0 },
+        5: { value: 5 },
+        6: { value: 1 },
         7: { value: 3 },
         8: { value: 12 },
         9: { value: 5.7 },
@@ -215,7 +215,7 @@ function init() {
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true});
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -323,6 +323,14 @@ function init() {
             //Rotate Local Space
             let partialCrystalAngleSpeed = new THREE.Vector3(getRandomScale(- 2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI));
             partialCrystalAngleSpeeds.push(partialCrystalAngleSpeed);
+
+        }
+
+        for(let i=0; i<partialCrystalRoots.length; i++){
+            let x = getRandomScale(-2 * Math.PI, 2 * Math.PI);
+            let y = getRandomScale(-2 * Math.PI, 2 * Math.PI);
+            let z = getRandomScale(-2 * Math.PI, 2 * Math.PI);
+            partialCrystalRoots[i].rotation.set(x, y, z);
         }
 
         //clone partial2 crystal
@@ -338,7 +346,7 @@ function init() {
 
             let alpha = 2 * Math.PI * getRandom();
 
-            let ua = getRandomScale(9, 89);
+            let ua = getRandomScale(9, 93);
 
             let rx = symbolX * ua * Math.cos(alpha);
             let rz = symbolY * ua * Math.sin(alpha);
@@ -347,7 +355,7 @@ function init() {
             let partial2Crystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partial2Crystal.visible = false;
             partial2Crystal.position.set(rx, ry, rz);
-            let partial2CrystalSize = 1.6;
+            let partial2CrystalSize = 2.3;
             partial2Crystal.scale.set(partial2CrystalSize, partial2CrystalSize, partial2CrystalSize);
             partial2Crystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
             partial2Crystals.push(partial2Crystal);
@@ -1388,9 +1396,9 @@ function render() {
 
     if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear || currentState == State.Partial) {
         //Logo Crystal Animation
-        logoCrystal.rotation.y += 0.02 * delta;
+        logoCrystal.rotation.y += 0.023 * delta;
         //Partial2 Crystal Animation    
-        partial2CrystalParent.rotation.y += 0.02 * delta;
+        partial2CrystalParent.rotation.y += 0.023 * delta;
         for (let i = 0; i < partial2CrystalCount; i++) {
             //Rotate in local space
             if (partial2Crystals[i]) {
@@ -1413,17 +1421,18 @@ function render() {
         //Rotate world space
         if (partialCrystalRoots[i]) {
             if (currentState == State.Laround) {
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 3600;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 3600;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 3600;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 3000;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 3000;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 3000;
             }
-            if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo) {
-                accelTimerForRootAngle += isMobile ? 0.00001 : 0.000001;
+            if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo || currentState == State.End) {
+                // accelTimerForRootAngle += isMobile ? 0.000005 : 0.000001;
+                accelTimerForRootAngle += 0.0000007;
                 let a = 0.0001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 4000 + a;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 4000 + a;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 4000 + a;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2000 + a;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2000 + a;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2000 + a;
             }
         }
     }
@@ -1441,12 +1450,28 @@ function render() {
                     let idx = 0;
                     partialCrystals.forEach(partCrystal => {
                         //Random point within sphere uniformly
-                        let rx = initPositionOfPartialCrystals[idx].x * 0.3;
-                        let ry = initPositionOfPartialCrystals[idx].y * 0.3;
-                        let rz = initPositionOfPartialCrystals[idx].z * 0.3;
-                        let sx = initScaleOfPartialCrystals[idx].x * 0.47;
-                        let sy = initScaleOfPartialCrystals[idx].y * 0.47;
-                        let sz = initScaleOfPartialCrystals[idx].z * 0.47;
+                        let symbolX = getRandomScale(-1, 1);
+                        symbolX = symbolX >= 0 ? 1 : -1;
+                        let symbolY = getRandomScale(-1, 1);
+                        symbolY = symbolY >= 0 ? 1 : -1;
+
+                        let alpha = 2 * Math.PI * getRandom();
+
+                        let ua = getRandomScale(25, 28);
+
+                        let rx = symbolX * ua * Math.cos(alpha);
+                        let rz = symbolY * ua * Math.sin(alpha);
+                        let ry = 0;
+                        // partialCrystalRoots[idx].rotation.set(0, beta, 0);
+
+                        // let rx = initPositionOfPartialCrystals[idx].x * 0.3;
+                        // let ry = initPositionOfPartialCrystals[idx].y * 0.3;
+                        // let rz = initPositionOfPartialCrystals[idx].z * 0.3;
+
+
+                        let sx = initScaleOfPartialCrystals[idx].x * 0.5;
+                        let sy = initScaleOfPartialCrystals[idx].y * 0.5;
+                        let sz = initScaleOfPartialCrystals[idx].z * 0.5;
                         TweenMax.killTweensOf(partCrystal);
                         TweenMax.to(partCrystal.position, 2, {
                             ease: Sine.easeInOut,
@@ -1534,7 +1559,7 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 0.7, {
+                    TweenMax.to(partCrystal.position, 1, {
                         ease: Power1.easeOut,
                         x: 0,
                         y: 0,
@@ -1545,7 +1570,7 @@ function render() {
                         }
                     });
                 });
-                TweenMax.to(brightnessValue, 0.7, {
+                TweenMax.to(brightnessValue, 1, {
                     ease: Power1.easeOut,
                     value: 0.1,
                 });
@@ -1572,7 +1597,7 @@ function render() {
 
                 //Control Logo crystal
                 TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(logoCrystal.scale, 2.5, {
+                TweenMax.to(logoCrystal.scale, 1.5, {
                     ease: Power1.easeOut,
                     x: 1,
                     y: 1,
@@ -1587,13 +1612,13 @@ function render() {
                 partial2Crystals.forEach(part2Crystal => {
                     part2Crystal.visible = true;
                     TweenMax.killTweensOf(part2Crystal);
-                    TweenMax.to(part2Crystal.position, 2.5, {
+                    TweenMax.to(part2Crystal.position, 1.5, {
                         ease: Power1.easeOut,
                         x: initPositionOfPartial2Crystals[idx].x,
                         y: initPositionOfPartial2Crystals[idx].y,
                         z: initPositionOfPartial2Crystals[idx].z,
                     });
-                    TweenMax.to(part2Crystal.scale, 2.5, {
+                    TweenMax.to(part2Crystal.scale, 1.5, {
                         ease: Power1.easeOut,
                         x: initScaleOfPartial2Crystals[idx].x,
                         y: initScaleOfPartial2Crystals[idx].y,
@@ -1606,8 +1631,8 @@ function render() {
                     idx++;
                 });
 
-                TweenMax.to(brightnessValue, 3, {
-                    ease: Power1.easeOut,
+                TweenMax.to(brightnessValue, 2.5, {
+                    ease: Power4.easeIn,
                     value: 1,
                 });
 
@@ -1615,7 +1640,7 @@ function render() {
                 ringMesh2.visible = true;
                 ringMesh3.visible = true;
                 ringMat.opacity = 1;
-                TweenMax.to(ringMesh1.scale, 7, {
+                TweenMax.to(ringMesh1.scale, 2.6, {
                     ease: Power1.easeOut,
                     x: 1,
                     y: 2,
@@ -1626,22 +1651,24 @@ function render() {
                     }
                 });
 
-                TweenMax.to(ringMesh2.scale, 5, {
+                TweenMax.to(ringMesh2.scale, 2.6, {
                     ease: Power1.easeOut,
                     x: 1,
                     y: 2,
                     z: 1,
+                    delay: 0.15,
                     onComplete() {
                         ringMesh2.visible = false;
                         ringMesh2.scale.set(0.001, 0.001, 0.001);
                     }
                 });
 
-                TweenMax.to(ringMesh3.scale, 3, {
+                TweenMax.to(ringMesh3.scale, 2.6, {
                     ease: Power1.easeOut,
                     x: 1,
                     y: 1,
                     z: 1,
+                    delay: 0.3,
                     onComplete() {
                         ringMesh3.visible = false;
                         ringMesh3.scale.set(0.001, 0.001, 0.001);
@@ -1656,6 +1683,7 @@ function render() {
             }
             break;
         case State.End:
+            
             if (!autoCreate)
                 autoCreate = true;
             downTimer = 0;
@@ -1783,9 +1811,9 @@ function render() {
                         });
                         TweenMax.to(partCrystal.scale, 1.5, {
                             ease: Expo.easeOut,
-                            x: initScaleOfPartialCrystals[idx].x,
-                            y: initScaleOfPartialCrystals[idx].y,
-                            z: initScaleOfPartialCrystals[idx].z,
+                            x: initScaleOfPartialCrystals[idx].x * 0.6,
+                            y: initScaleOfPartialCrystals[idx].y * 0.6,
+                            z: initScaleOfPartialCrystals[idx].z * 0.6,
                             onComplete() {
                                 // currentState = State.Saround;
                             },
@@ -1857,8 +1885,8 @@ function render() {
     if (startEffect) {
         expUpdate(expTextures[Math.floor(expTimer)]);
         ringUpdate(shineTextures[Math.floor(ringTimer)]);
-        expTimer += delta * 2.5;
-        ringTimer += delta * 2.75;
+        expTimer += delta * 3.2;
+        ringTimer += delta * 3.95;
 
         if (expTimer > expTextures.length || ringTimer > shineTextures.length) {
             startEffect = false;
