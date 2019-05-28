@@ -1,5 +1,5 @@
-var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
-// var assetPath = "Assets/";
+// var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
+var assetPath = "Assets/";
 var container;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
 
@@ -67,7 +67,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 48;
+var partial2CrystalCount = 38;
 
 var totalRoot;
 
@@ -136,14 +136,15 @@ var State = {
         2: { value: 15.0 },
         3: { value: 10.6 },
         4: { value: 1 },
-        5: { value: 5 },
+        5: { value: 2.5 },
         6: { value: 1 },
         7: { value: 3 },
         8: { value: 12 },
-        9: { value: 5.7 },
+        9: { value: 6.7 },
         10: { value: 8 },
     }
 };
+
 
 var currentState = State.Laround;
 
@@ -158,6 +159,10 @@ var startEffect = false;
 var expTimer = 0;
 var ringTimer = 0;
 
+var gatherParam = {
+    value:0
+}
+
 var alphaTimer = {
     min: 0.1,
     max: 0.7,
@@ -165,6 +170,9 @@ var alphaTimer = {
     val: 0.5,
     inc: true
 };
+
+//fix 'S' crystal 
+var isFixed = true;
 
 function getRandomScale(low, high) {
     return getRandom() * (high - low) + low
@@ -210,12 +218,12 @@ function init() {
         scene = new THREE.Scene();
         // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
-        scene.background = new THREE.Color(0x0c1745);
+        // scene.background = new THREE.Color(0x0c1745);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -295,7 +303,7 @@ function init() {
             let partialCrystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partialCrystal.visible = true;
             partialCrystal.position.set(rx, ry, rz);
-            let partialCrystalSize = 3.6;
+            let partialCrystalSize = 0.16;
             partialCrystal.scale.set(partialCrystalSize, partialCrystalSize, partialCrystalSize);
             partialCrystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
             partialCrystals.push(partialCrystal);
@@ -326,7 +334,7 @@ function init() {
 
         }
 
-        for(let i=0; i<partialCrystalRoots.length; i++){
+        for (let i = 0; i < partialCrystalRoots.length; i++) {
             let x = getRandomScale(-2 * Math.PI, 2 * Math.PI);
             let y = getRandomScale(-2 * Math.PI, 2 * Math.PI);
             let z = getRandomScale(-2 * Math.PI, 2 * Math.PI);
@@ -355,7 +363,7 @@ function init() {
             let partial2Crystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
             partial2Crystal.visible = false;
             partial2Crystal.position.set(rx, ry, rz);
-            let partial2CrystalSize = 2.3;
+            let partial2CrystalSize = 0.11;
             partial2Crystal.scale.set(partial2CrystalSize, partial2CrystalSize, partial2CrystalSize);
             partial2Crystal.rotation.set(getRandomScale(-40, 40), getRandomScale(-40, 40), getRandomScale(-40, 40));
             partial2Crystals.push(partial2Crystal);
@@ -377,7 +385,6 @@ function init() {
             initScaleOfPartial2Crystals.push(s);
 
             partial2Crystal.position.set(0, 0, 0);
-            partial2Crystal.scale.set(0.3, 0.3, 0.3);
 
             //Rotate Local Space
             let partial2CrystalAngleSpeed = new THREE.Vector3(getRandomScale(- 2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI), getRandomScale(-2 * Math.PI, 2 * Math.PI));
@@ -386,7 +393,6 @@ function init() {
 
         //Logo
         logoCrystals.forEach(element => {
-            element.scale.set(0.1, 0.1, 0.1);
             totalRoot.add(element);
         });
         logoCrystal = logoCrystals[logoCrystalIdx];
@@ -585,11 +591,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -613,7 +619,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 1
             },
             animationParam2: {
                 type: "1f",
@@ -665,11 +671,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -693,7 +699,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 1
             },
             animationParam2: {
                 type: "1f",
@@ -745,11 +751,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -773,7 +779,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 1
             },
             animationParam2: {
                 type: "1f",
@@ -825,11 +831,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -853,7 +859,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 1
             },
             animationParam2: {
                 type: "1f",
@@ -905,11 +911,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -921,7 +927,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 0
             },
             animationParam2: {
                 type: "1f",
@@ -977,11 +983,11 @@ function init() {
             },
             matrixWorldInverse: {
                 type: "m4",
-                value: null
+                value: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
             },
             lightPosition: {
                 type: "3f",
-                value: null
+                value: [0,0,0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -993,7 +999,7 @@ function init() {
             },
             animationParam1: {
                 type: "1f",
-                value: 100000000
+                value: 0
             },
             animationParam2: {
                 type: "1f",
@@ -1032,19 +1038,57 @@ function init() {
     var modelPath = assetPath + "model/";
     for (let i = 0; i < 2; i++) {
         new THREE.OBJLoader(manager).setPath(modelPath).load('logo' + (i + 1) + '.obj', function (object) {
-            object.visible = false;
             object.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
+
+                    child.material.dispose();
+
+                    noise.seed(Math.random());
+                    let vertices = [];
+                    let uvs = [];
+                    let normals = [];
+                    let vertexRandomValues = [];
+                    let geometry = new THREE.BufferGeometry();
+
+                    let len = child.geometry.attributes.position.array.length;
+                    for (let i = 0; i < len / 3; i++) {
+                        let x = child.geometry.attributes.position.array[3 * i + 0];
+                        let y = child.geometry.attributes.position.array[3 * i + 1];
+                        let z = child.geometry.attributes.position.array[3 * i + 2];
+                        vertices.push(x);
+                        vertices.push(y);
+                        vertices.push(z);
+                        uvs.push(child.geometry.attributes.uv.array[2 * i + 0]);
+                        uvs.push(child.geometry.attributes.uv.array[2 * i + 1]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 0]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 1]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 2]);
+                        vertexRandomValues.push(noise.simplex3(x / 2, y / 2, z / 2)+1);
+                    }
+                    child.geometry.dispose();
+
+                    let positions = new Float32Array(vertices);
+                    geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+                    geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
+                    geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+                    geometry.addAttribute("vertexRandomValue", new THREE.BufferAttribute(new Float32Array(vertexRandomValues), 1));
+                    geometry.computeVertexNormals();
+
+                    child.geometry = geometry;
+
                     child.scale.set(0.15, 0.15, 0.15);
                     if (i == 0) {
                         child.material = lCrystalShader1;
-                    }
-                    if (i == 1) {
+                    } else if (i == 1) {
                         child.material = lCrystalShader2;
                     }
+
+                    child.visible = false;
+                    logoCrystals.push(child);
+
                 }
             });
-            logoCrystals.push(object);
+
         });
     }
 
@@ -1055,6 +1099,36 @@ function init() {
             object.visible = false;
             object.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {
+                    child.material.dispose();
+
+                    let vertices = [];
+                    let uvs = [];
+                    let normals = [];
+                    let geometry = new THREE.BufferGeometry();
+
+                    let len = child.geometry.attributes.position.array.length;
+                    for (let i = 0; i < len / 3; i++) {
+                        let x = child.geometry.attributes.position.array[3 * i + 0];
+                        let y = child.geometry.attributes.position.array[3 * i + 1];
+                        let z = child.geometry.attributes.position.array[3 * i + 2];
+                        vertices.push(x);
+                        vertices.push(y);
+                        vertices.push(z);
+                        uvs.push(child.geometry.attributes.uv.array[2 * i + 0]);
+                        uvs.push(child.geometry.attributes.uv.array[2 * i + 1]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 0]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 1]);
+                        normals.push(child.geometry.attributes.normal.array[3 * i + 2]);
+                    }
+                    child.geometry.dispose();
+
+                    geometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(vertices), 3));
+                    geometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
+                    geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+                    geometry.computeVertexNormals();
+
+                    child.geometry = geometry;
+
                     child.scale.set(0.05, 0.05, 0.05);
                     if (i == 0 || i == 1) {
                         child.material = sCrystalShader1;
@@ -1068,9 +1142,11 @@ function init() {
                     if (i > 5) {
                         child.material = sCrystalShader4;
                     }
+
+                    originPartialCrystals.push(child);
                 }
             })
-            originPartialCrystals.push(object);
+
         });
     }
 
@@ -1085,6 +1161,7 @@ function init() {
     document.addEventListener('touchstart', onDocumentTouchStart, false);
     document.addEventListener('touchmove', onDocumentTouchMove, false);
     document.addEventListener('touchend', onDocumentTouchEnd, false);
+    document.addEventListener('touchcancel', onDocumentTouchCancel, false);
     window.addEventListener('resize', onWindowResize, false);
     /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1103,7 +1180,7 @@ function onDocumentMouseDown(event) {
     oldDownPosY = event.clientY;
 
     raycaster.setFromCamera(pickMouse, camera);
-    var intersects = raycaster.intersectObjects([logoCrystal.children[0]]);
+    var intersects = raycaster.intersectObjects([logoCrystal]);
     if (intersects.length > 0) {
         pickLogo = true;
     }
@@ -1126,17 +1203,52 @@ function onDocumentMouseMove(event) {
     if (totalRoot) {
 
         if (isMouseDown) {
-            let y = (event.clientX - oldDownPosX) * 0.05;
-            oldDownPosX = event.clientX;
+            if (currentState == State.Laround || currentState == State.LogoAppear) {
+                let y = (event.clientX - oldDownPosX) * 0.05;
+                oldDownPosX = event.clientX;
 
-            TweenMax.killTweensOf(totalRoot);
-            TweenMax.to(totalRoot.rotation, 3, {
-                ease: Expo.easeOut,
-                y: totalRoot.rotation.y + y,
-                onUpdate: function (t) {
+                TweenMax.killTweensOf(totalRoot);
+                TweenMax.to(totalRoot.rotation, 3, {
+                    ease: Expo.easeOut,
+                    y: totalRoot.rotation.y + y,
+                    onUpdate: function (t) {
 
+                    }
+                })
+            }
+            else {
+                if (isFixed) {
+                    if (logoCrystalIdx != 0) {
+                        let y = (event.clientX - oldDownPosX) * 0.05;
+                        oldDownPosX = event.clientX;
+
+                        TweenMax.killTweensOf(totalRoot);
+                        TweenMax.to(totalRoot.rotation, 3, {
+                            ease: Expo.easeOut,
+                            y: totalRoot.rotation.y + y,
+                            onUpdate: function (t) {
+
+                            }
+                        })
+                    }
                 }
-            })
+                else {
+                    let y = (event.clientX - oldDownPosX) * 0.05;
+                    oldDownPosX = event.clientX;
+
+                    TweenMax.killTweensOf(totalRoot);
+                    TweenMax.to(totalRoot.rotation, 3, {
+                        ease: Expo.easeOut,
+                        y: totalRoot.rotation.y + y,
+                        onUpdate: function (t) {
+
+                        }
+                    })
+                }
+            }
+
+
+
         }
         else {
             //Hover
@@ -1187,6 +1299,9 @@ function onDocumentTouchStart(event) {
     }
 }
 function onDocumentTouchEnd(event) {
+    isMouseDown = false;
+}
+function onDocumentTouchCancel(event) {
     isMouseDown = false;
 }
 function onDocumentTouchMove(event) {
@@ -1262,19 +1377,17 @@ function animate() {
 function partialCrystalUpdate(time, texture, pos) {
     for (let i = 0; i < partialCrystalCount; i++) {
         if (partialCrystals[i]) {
-            partialCrystals[i].traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 150;
-                    child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = alphaTimer.val;
-                    child.material.uniforms.lightPosition.value = pos;
-                    child.material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld)
-                    child.material.uniforms["animationParam2"].value = brightnessValue.value;
-                    child.material.uniforms.lightValueParam.value = lightValueParam.value;
-                    child.material.uniforms.radius = 0;// distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
-                    child.material.needsUpdate = true;
-                }
-            });
+
+            partialCrystals[i].material.uniforms.time.value = time + 150;
+            partialCrystals[i].material.uniforms.envMap.value = texture;
+            partialCrystals[i].material.uniforms.alphaValue.value = alphaTimer.val;
+            partialCrystals[i].material.uniforms.lightPosition.value = pos;
+            partialCrystals[i].material.uniforms.matrixWorldInverse.value = partialCrystals[i].matrixWorld.getInverse(partialCrystals[i].matrixWorld);
+            partialCrystals[i].material.uniforms["animationParam1"].value = 1;
+            partialCrystals[i].material.uniforms["animationParam2"].value = brightnessValue.value;
+            partialCrystals[i].material.uniforms.lightValueParam.value = lightValueParam.value;
+            partialCrystals[i].material.uniforms.radius = distanceVector(partialCrystals[i].position, new THREE.Vector3(0, 0, 0));
+            partialCrystals[i].material.needsUpdate = true;
         }
     }
 }
@@ -1282,60 +1395,46 @@ function partialCrystalUpdate(time, texture, pos) {
 function partial2CrystalUpdate(time, texture, pos) {
     for (let i = 0; i < partial2CrystalCount; i++) {
         if (partial2Crystals[i]) {
-            partial2Crystals[i].traverse(function (child) {
-                if (child instanceof THREE.Mesh) {
-                    child.material.uniforms.time.value = time + 100;
-                    child.material.uniforms.envMap.value = texture;
-                    child.material.uniforms.alphaValue.value = alphaTimer.val;
-                    child.material.uniforms.lightPosition.value = pos;
-                    child.material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
-                    child.material.uniforms["animationParam2"].value = brightnessValue.value;
-                    child.material.uniforms.lightValueParam.value = lightValueParam.value;
-                    child.material.uniforms.radius = 0;// distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
-                    child.material.needsUpdate = true;
-                }
-            });
+            partial2Crystals[i].material.uniforms.time.value = time + 100;
+            partial2Crystals[i].material.uniforms.envMap.value = texture;
+            partial2Crystals[i].material.uniforms.alphaValue.value = alphaTimer.val;
+            partial2Crystals[i].material.uniforms.lightPosition.value = pos;
+            partial2Crystals[i].material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
+            partial2Crystals[i].material.uniforms["animationParam1"].value = gatherParam.value;
+            partial2Crystals[i].material.uniforms["animationParam2"].value = brightnessValue.value;
+            partial2Crystals[i].material.uniforms.lightValueParam.value = lightValueParam.value;
+            partial2Crystals[i].material.uniforms.radius = 0;// distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
+            partial2Crystals[i].material.needsUpdate = true;
         }
     }
 }
 
 function logoCrystalUpdate(time, texture, pos) {
     if (logoCrystal != null) {
-        logoCrystal.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material.uniforms.time.value = time + 100;
-                child.material.uniforms.envMap.value = texture;
-                child.material.uniforms.alphaValue.value = alphaTimer.val;
-                child.material.uniforms.lightPosition.value = pos;
-                child.material.uniforms.matrixWorldInverse.value = logoCrystals[logoCrystalIdx].matrixWorld.getInverse(logoCrystals[logoCrystalIdx].matrixWorld);
-                child.material.uniforms["animationParam2"].value = brightnessValue.value;
-                child.material.uniforms["animationParam3"].value = vibrateValue.value;
-                child.material.uniforms.lightValueParam.value = lightValueParam.value;
-                child.material.needsUpdate = true;
-            }
-        });
+        logoCrystal.material.uniforms.time.value = time + 100;
+        logoCrystal.material.uniforms.envMap.value = texture;
+        logoCrystal.material.uniforms.alphaValue.value = alphaTimer.val;
+        logoCrystal.material.uniforms.lightPosition.value = pos;
+        logoCrystal.material.uniforms.matrixWorldInverse.value = logoCrystal.matrixWorld.getInverse(logoCrystal.matrixWorld);
+        logoCrystal.material.uniforms["animationParam1"].value = gatherParam.value;
+        logoCrystal.material.uniforms["animationParam2"].value = brightnessValue.value;
+        logoCrystal.material.uniforms["animationParam3"].value = vibrateValue.value;
+        logoCrystal.material.uniforms.lightValueParam.value = lightValueParam.value;
+        logoCrystal.material.needsUpdate = true;
     }
 }
 
 function expUpdate(texture) {
     if (expMesh) {
-        expMesh.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material.map = texture;
-                child.material.needsUpdate = true;
-            }
-        });
+        expMesh.material.map = texture;
+        expMesh.material.needsUpdate = true;
     }
 }
 
 function ringUpdate(texture) {
     if (shineMesh) {
-        shineMesh.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material.map = texture;
-                child.material.needsUpdate = true;
-            }
-        });
+        shineMesh.material.map = texture;
+        shineMesh.material.needsUpdate = true;
     }
 }
 
@@ -1396,7 +1495,15 @@ function render() {
 
     if (currentState == State.End || currentState == State.LogoAround || currentState == State.LogoGather || currentState == State.LogoAppear || currentState == State.Partial) {
         //Logo Crystal Animation
-        logoCrystal.rotation.y += 0.023 * delta;
+        if (isFixed) {
+            if (logoCrystalIdx != 0) {
+                logoCrystal.rotation.y += 0.023 * delta;
+            }
+        }
+        else {
+            logoCrystal.rotation.y += 0.023 * delta;
+        }
+
         //Partial2 Crystal Animation    
         partial2CrystalParent.rotation.y += 0.023 * delta;
         for (let i = 0; i < partial2CrystalCount; i++) {
@@ -1427,15 +1534,16 @@ function render() {
             }
             if (currentState == State.Lgather || currentState == State.Saround || currentState == State.Sgather || currentState == State.Logo || currentState == State.End) {
                 // accelTimerForRootAngle += isMobile ? 0.000005 : 0.000001;
-                accelTimerForRootAngle += 0.0000007;
+                accelTimerForRootAngle += 0.00000087;
                 let a = 0.0001 - accelTimerForRootAngle;
                 a = a > 0 ? 0 : Math.abs(a);
-                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 2000 + a;
-                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 2000 + a;
-                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 2000 + a;
+                partialCrystalRoots[i].rotation.x += partialCrystalRootAngleSpeeds[i].x / 1000 + a;
+                partialCrystalRoots[i].rotation.y += partialCrystalRootAngleSpeeds[i].y / 1000 + a;
+                partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 1000 + a;
             }
         }
     }
+
 
     switch (currentState) {
         case State.Laround:
@@ -1516,13 +1624,13 @@ function render() {
                 let idx = 0;
                 partialCrystals.forEach(partCrystal => {
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 1.9, {
+                    TweenMax.to(partCrystal.position, 5.9, {
                         x: initPositionOfPartialCrystals[idx].x,
                         y: initPositionOfPartialCrystals[idx].y,
                         z: initPositionOfPartialCrystals[idx].z,
                         ease: Expo.easeOut
                     });
-                    TweenMax.to(partCrystal.scale, 1.5, {
+                    TweenMax.to(partCrystal.scale, 5.5, {
                         x: initScaleOfPartialCrystals[idx].x,
                         y: initScaleOfPartialCrystals[idx].y,
                         z: initScaleOfPartialCrystals[idx].z,
@@ -1535,7 +1643,7 @@ function render() {
 
                     idx++;
                 });
-                TweenMax.to(brightnessValue, 2, {
+                TweenMax.to(brightnessValue, 5, {
                     ease: Sine.easeInOut,
                     value: 1,
                 });
@@ -1559,7 +1667,7 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 1, {
+                    TweenMax.to(partCrystal.position, 0.5, {
                         ease: Power1.easeOut,
                         x: 0,
                         y: 0,
@@ -1570,7 +1678,7 @@ function render() {
                         }
                     });
                 });
-                TweenMax.to(brightnessValue, 1, {
+                TweenMax.to(brightnessValue, 0.5, {
                     ease: Power1.easeOut,
                     value: 0.1,
                 });
@@ -1592,20 +1700,14 @@ function render() {
                 shineMesh.visible = true;
                 logoCrystal = logoCrystals[logoCrystalIdx];
                 logoCrystal.visible = true;
-                logoCrystal.rotation.set(0, 0, 0);
+                logoCrystal.rotation.set(0, -Math.PI / 8, 0);
                 totalRoot.rotation.set(0, Math.PI * 3.3 / 5 + Math.PI / 2, 0);
 
                 //Control Logo crystal
-                TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(logoCrystal.scale, 1.5, {
+                // TweenMax.killTweensOf(logoCrystal);
+                TweenMax.to(gatherParam, 1.5, {
                     ease: Power1.easeOut,
-                    x: 1,
-                    y: 1,
-                    z: 1,
-                    onComplete() {
-                    },
-                    onUpdate() {
-                    }
+                    value: 1
                 });
 
                 let idx = 0;
@@ -1683,7 +1785,7 @@ function render() {
             }
             break;
         case State.End:
-            
+
             if (!autoCreate)
                 autoCreate = true;
             downTimer = 0;
@@ -1692,13 +1794,8 @@ function render() {
             for (let i = 0; i < partialCrystalCount; i++) {
                 scene.remove(partialCrystalRoots[i]);
                 scene.remove(partialCrystals[i]);
-                partialCrystals[i].traverse(function (child) {
-                    if (child instanceof THREE.Mesh) {
-                        scene.remove(child);
-                        child.geometry.dispose();
-                        child.material.dispose();
-                    }
-                });
+                // partialCrystals[i].geometry.dispose();
+                // partialCrystals[i].material.dispose();
             }
             partialCrystals.forEach(partCrystal => {
                 partCrystal.visible = false;
@@ -1748,26 +1845,26 @@ function render() {
                             y: ry,
                             z: rz
                         });
-                        TweenMax.to(part2Crystal.scale, 1.2, {
-                            ease: Expo.easeIn,
-                            x: sx,
-                            y: sy,
-                            z: sz
-                        });
+                        // TweenMax.to(part2Crystal.scale, 1.2, {
+                        //     ease: Expo.easeIn,
+                        //     x: sx,
+                        //     y: sy,
+                        //     z: sz
+                        // });
                     });
 
-                    TweenMax.killTweensOf(logoCrystal);
-                    TweenMax.to(logoCrystal.scale, 1.2, {
-                        ease: Expo.easeIn,
-                        x: 0.01,
-                        y: 0.01,
-                        z: 0.01,
+                    TweenMax.killTweensOf(gatherParam);
+                    TweenMax.to(gatherParam, 2.0, {
+                        ease: Sine.easeInOut,
+                        value: 0,
                         onComplete() {
                             vibrateValue.value = 0;
                         },
                     });
+
                     downTimer = 0;
 
+                    TweenMax.killTweensOf(brightnessValue);
                     TweenMax.to(brightnessValue, 1, {
                         ease: Expo.easeIn,
                         value: 0.1
@@ -1857,13 +1954,19 @@ function render() {
                     idx++;
                 });
 
-                TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(logoCrystal.scale, 2, {
+                // TweenMax.killTweensOf(logoCrystal);
+                // TweenMax.to(logoCrystal.scale, 2, {
+                //     ease: Expo.easeOut,
+                //     x: 1,
+                //     y: 1,
+                //     z: 1,
+                // });
+
+                TweenMax.to(gatherParam, 2.5, {
                     ease: Expo.easeOut,
-                    x: 1,
-                    y: 1,
-                    z: 1,
+                    value: 1
                 });
+
                 TweenMax.to(brightnessValue, 1.5, {
                     ease: Expo.easeOut,
                     value: 1
