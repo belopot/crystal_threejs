@@ -136,11 +136,11 @@ var State = {
         2: { value: 15.0 },
         3: { value: 10.6 },
         4: { value: 1 },
-        5: { value: 2.5 },
+        5: { value: 2.0 },
         6: { value: 1 },
         7: { value: 3 },
         8: { value: 12 },
-        9: { value: 6.7 },
+        9: { value: 8.7 },
         10: { value: 8 },
     }
 };
@@ -284,6 +284,7 @@ function init() {
         totalRoot.add(partialCrystalParent);
         scene.add(totalRoot);
 
+        let partialCrystalIdx = 0;
         for (let i = 0; i < partialCrystalCount; i++) {
             //Random point within sphere uniformly
             let symbolX = getRandomScale(-1, 1);
@@ -300,7 +301,12 @@ function init() {
             let ry = symbolY * ua * Math.sin(alpha);
             let rz = 0;
 
-            let partialCrystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
+            let partialCrystal = originPartialCrystals[partialCrystalIdx].clone();
+            partialCrystalIdx++;
+            if(partialCrystalIdx == originPartialCrystals.length){
+                partialCrystalIdx = 0;
+            }
+
             partialCrystal.visible = true;
             partialCrystal.position.set(rx, ry, rz);
             let partialCrystalSize = 0.16;
@@ -345,6 +351,7 @@ function init() {
         partial2CrystalParent = new THREE.Object3D();
         totalRoot.add(partial2CrystalParent);
 
+        let partial2CrystalIdx = 0;
         for (let i = 0; i < partial2CrystalCount; i++) {
             //Random point within sphere uniformly
             let symbolX = getRandomScale(-1, 1);
@@ -360,7 +367,12 @@ function init() {
             let rz = symbolY * ua * Math.sin(alpha);
             let ry = getRandomScale(-30, 30);
 
-            let partial2Crystal = originPartialCrystals[Math.floor(getRandomScale(0, originPartialCrystals.length))].clone();
+            let partial2Crystal = originPartialCrystals[partial2CrystalIdx].clone();
+            partial2CrystalIdx++;
+            if(partial2CrystalIdx == originPartialCrystals.length){
+                partial2CrystalIdx = 0;
+            }
+
             partial2Crystal.visible = false;
             partial2Crystal.position.set(rx, ry, rz);
             let partial2CrystalSize = 0.11;
@@ -1063,7 +1075,9 @@ function init() {
                         normals.push(child.geometry.attributes.normal.array[3 * i + 0]);
                         normals.push(child.geometry.attributes.normal.array[3 * i + 1]);
                         normals.push(child.geometry.attributes.normal.array[3 * i + 2]);
-                        vertexRandomValues.push(noise.simplex3(x / 2, y / 2, z / 2)+1);
+                        //noise.simplex3() -> [-1, 1]
+                        //vertexRandomValue -> [0, 2]
+                        vertexRandomValues.push((noise.simplex3(x / 2, y / 2, z / 2)+1)/2);
                     }
                     child.geometry.dispose();
 
@@ -1667,7 +1681,7 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 0.5, {
+                    TweenMax.to(partCrystal.position, 0.65, {
                         ease: Power1.easeOut,
                         x: 0,
                         y: 0,
@@ -1678,7 +1692,7 @@ function render() {
                         }
                     });
                 });
-                TweenMax.to(brightnessValue, 0.5, {
+                TweenMax.to(brightnessValue, 0.65, {
                     ease: Power1.easeOut,
                     value: 0.1,
                 });
@@ -1706,7 +1720,7 @@ function render() {
                 //Control Logo crystal
                 // TweenMax.killTweensOf(logoCrystal);
                 TweenMax.to(gatherParam, 1.5, {
-                    ease: Power1.easeOut,
+                    ease: Power1.easeInOut,
                     value: 1
                 });
 
@@ -1715,13 +1729,13 @@ function render() {
                     part2Crystal.visible = true;
                     TweenMax.killTweensOf(part2Crystal);
                     TweenMax.to(part2Crystal.position, 1.5, {
-                        ease: Power1.easeOut,
+                        ease: Power1.easeInOut,
                         x: initPositionOfPartial2Crystals[idx].x,
                         y: initPositionOfPartial2Crystals[idx].y,
                         z: initPositionOfPartial2Crystals[idx].z,
                     });
                     TweenMax.to(part2Crystal.scale, 1.5, {
-                        ease: Power1.easeOut,
+                        ease: Power1.easeInOut,
                         x: initScaleOfPartial2Crystals[idx].x,
                         y: initScaleOfPartial2Crystals[idx].y,
                         z: initScaleOfPartial2Crystals[idx].z,
@@ -1743,7 +1757,7 @@ function render() {
                 ringMesh3.visible = true;
                 ringMat.opacity = 1;
                 TweenMax.to(ringMesh1.scale, 2.6, {
-                    ease: Power1.easeOut,
+                    ease: Power1.easeInOut,
                     x: 1,
                     y: 2,
                     z: 1,
@@ -1754,7 +1768,7 @@ function render() {
                 });
 
                 TweenMax.to(ringMesh2.scale, 2.6, {
-                    ease: Power1.easeOut,
+                    ease: Power1.easeInOut,
                     x: 1,
                     y: 2,
                     z: 1,
@@ -1766,7 +1780,7 @@ function render() {
                 });
 
                 TweenMax.to(ringMesh3.scale, 2.6, {
-                    ease: Power1.easeOut,
+                    ease: Power1.easeInOut,
                     x: 1,
                     y: 1,
                     z: 1,
@@ -1778,7 +1792,7 @@ function render() {
                 });
 
                 TweenMax.to(ringMat, 5, {
-                    ease: Power1.easeOut,
+                    ease: Power1.easeInOut,
                     opacity: 0
                 });
 
@@ -1839,22 +1853,24 @@ function render() {
                         let sy = 0.01;
                         let sz = 0.01;
                         TweenMax.killTweensOf(part2Crystal);
-                        TweenMax.to(part2Crystal.position, 1.2, {
-                            ease: Expo.easeIn,
+                        TweenMax.to(part2Crystal.position, 1.9, {
+                            ease: Sine.easeInOut,
                             x: rx,
                             y: ry,
-                            z: rz
+                            z: rz,
+                            delay: 0.5
                         });
-                        // TweenMax.to(part2Crystal.scale, 1.2, {
-                        //     ease: Expo.easeIn,
+                        // TweenMax.to(part2Crystal.scale, 1.9, {
+                        //     ease: Sine.easeInOut,
                         //     x: sx,
                         //     y: sy,
-                        //     z: sz
+                        //     z: sz,
+                        //     delay: 0.2
                         // });
                     });
 
                     TweenMax.killTweensOf(gatherParam);
-                    TweenMax.to(gatherParam, 2.0, {
+                    TweenMax.to(gatherParam, 1.9, {
                         ease: Sine.easeInOut,
                         value: 0,
                         onComplete() {
@@ -1865,8 +1881,8 @@ function render() {
                     downTimer = 0;
 
                     TweenMax.killTweensOf(brightnessValue);
-                    TweenMax.to(brightnessValue, 1, {
-                        ease: Expo.easeIn,
+                    TweenMax.to(brightnessValue, 1.9, {
+                        ease: Sine.easeInOut,
                         value: 0.1
                     });
 
