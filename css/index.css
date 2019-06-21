@@ -69,7 +69,8 @@ a {
     margin-right: auto;
     bottom: 56px;
     width: 72px;
-    height: 72px
+    height: 72px;
+    cursor: pointer;
 }
 
 #loading .indicator:before {

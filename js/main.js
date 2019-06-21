@@ -203,12 +203,12 @@ function init() {
         scene = new THREE.Scene();
         // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
-        // scene.background = new THREE.Color(0x0c1745);
+        scene.background = new THREE.Color(0x111f65);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -981,6 +981,22 @@ function init() {
 
 }
 
+$('.indicator').on({ 'mousedown' : function(){
+    pickLogo = true;
+}});
+$('.indicator').on({ 'mouseup' : function(){
+    pickLogo = false;
+}});
+$('.indicator').on({ 'touchstart' : function(){
+    pickLogo = true;
+}});
+$('.indicator').on({ 'touchend' : function(){
+    pickLogo = false;
+}});
+$('.indicator').on({ 'touchcancel' : function(){
+    pickLogo = false;
+}});
+
 function onDocumentMouseDown(event) {
     isMouseDown = true;
     targetRotationX = cameraRoot.rotation.y;
@@ -1017,7 +1033,7 @@ function onDocumentMouseMove(event) {
     if (totalRoot) {
 
         if (isMouseDown) {
-            if (currentState == State.Laround || currentState == State.LogoAppear) {
+            if (currentState == State.Laround) {
                 let y = (event.clientX - oldDownPosX) * 0.05;
                 oldDownPosX = event.clientX;
 
@@ -1135,7 +1151,7 @@ function onDocumentTouchMove(event) {
         if (totalRoot) {
 
             if (isMouseDown) {
-                if (currentState == State.Laround || currentState == State.LogoAppear) {
+                if (currentState == State.Laround) {
                     let y = (event.touches[0].pageX - oldDownPosX) * 0.05;
                     oldDownPosX = event.touches[0].pageX;
 
@@ -1542,7 +1558,7 @@ function render() {
 
                 //Control Logo crystal
                 // TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(gatherParam, 1.5, {
+                TweenMax.to(gatherParam, 3, {
                     ease: Power1.easeInOut,
                     value: 1
                 });
