@@ -67,10 +67,6 @@ var loaded = false;
 var holderContainer;
 
 //Camera Animation
-var targetRotationX = 0;
-var targetRotationY = 0;
-var targetRotationXOnMouseDown = 0;
-var targetRotationYOnMouseDown = 0;
 var mouseX = 0;
 var mouseY = 0;
 var mouseXOnMouseDown = 0;
@@ -125,7 +121,7 @@ var State = {
         6: { value: 1 },
         7: { value: 3 },
         8: { value: 12 },
-        9: { value: 9.7 },
+        9: { value: 6 },
         10: { value: 8 },
     }
 };
@@ -155,6 +151,8 @@ var alphaTimer = {
     val: 0.2,
     inc: true
 };
+
+var rotationSensitivity = 0.02;
 
 //fix 'S' crystal 
 var isFixed = true;
@@ -999,12 +997,9 @@ $('.indicator').on({ 'touchcancel' : function(){
 
 function onDocumentMouseDown(event) {
     isMouseDown = true;
-    targetRotationX = cameraRoot.rotation.y;
     event.preventDefault();
     mouseXOnMouseDown = event.clientX - windowHalfX;
-    targetRotationXOnMouseDown = targetRotationX;
     mouseYOnMouseDown = event.clientY - windowHalfY;
-    targetRotationYOnMouseDown = targetRotationY;
 
     oldDownPosX = event.clientX;
     oldDownPosY = event.clientY;
@@ -1020,21 +1015,32 @@ function onDocumentMouseUp() {
 }
 function onDocumentMouseMove(event) {
     event.preventDefault();
+    
+    //Set cursor for logo
+    if(currentState === State.LogoAround){
+        raycaster.setFromCamera(pickMouse, camera);
+        var intersects = raycaster.intersectObjects([logoCrystal]);
+        if (intersects.length > 0) {
+            document.body.style.cursor = "pointer";
+        }
+        else{
+            document.body.style.cursor = "default";
+        }
+    }
+    
 
     pickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     pickMouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
     mouseX = event.clientX - windowHalfX;
-    targetRotationX = targetRotationXOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
     mouseY = event.clientY// - windowHalfY;
-    targetRotationY = targetRotationYOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
     //Animation for mouse hover
 
     if (totalRoot) {
 
         if (isMouseDown) {
             if (currentState == State.Laround) {
-                let y = (event.clientX - oldDownPosX) * 0.05;
+                let y = (event.clientX - oldDownPosX) * rotationSensitivity;
                 oldDownPosX = event.clientX;
 
                 TweenMax.killTweensOf(totalRoot);
@@ -1049,7 +1055,7 @@ function onDocumentMouseMove(event) {
             else {
                 if (isFixed) {
                     if (logoCrystalIdx != 0) {
-                        let y = (event.clientX - oldDownPosX) * 0.05;
+                        let y = (event.clientX - oldDownPosX) * rotationSensitivity;
                         oldDownPosX = event.clientX;
 
                         TweenMax.killTweensOf(totalRoot);
@@ -1063,7 +1069,7 @@ function onDocumentMouseMove(event) {
                     }
                 }
                 else {
-                    let y = (event.clientX - oldDownPosX) * 0.05;
+                    let y = (event.clientX - oldDownPosX) * rotationSensitivity;
                     oldDownPosX = event.clientX;
 
                     TweenMax.killTweensOf(totalRoot);
@@ -1110,13 +1116,10 @@ function onDocumentMouseMove(event) {
 }
 function onDocumentTouchStart(event) {
     isMouseDown = true;
-    targetRotationX = cameraRoot.rotation.y;
     if (event.touches.length == 1) {
         // event.preventDefault();
         mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
-        targetRotationXOnMouseDown = targetRotationX;
         mouseYOnMouseDown = event.touches[0].pageY - windowHalfY;
-        targetRotationYOnMouseDown = targetRotationY;
 
         oldDownPosX = event.touches[0].pageX;
         oldDownPosY = event.touches[0].pageY;
@@ -1143,16 +1146,14 @@ function onDocumentTouchMove(event) {
         pickMouse.y = - (event.touches[0].pageY / window.innerHeight) * 2 + 1;
 
         mouseX = event.touches[0].pageX - windowHalfX;
-        targetRotationX = targetRotationXOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.02;
         mouseY = event.touches[0].pageY// - windowHalfY;
-        targetRotationY = targetRotationYOnMouseDown + (mouseY - mouseYOnMouseDown) * 0.02;
         //Animation for mouse hover
 
         if (totalRoot) {
 
             if (isMouseDown) {
                 if (currentState == State.Laround) {
-                    let y = (event.touches[0].pageX - oldDownPosX) * 0.05;
+                    let y = (event.touches[0].pageX - oldDownPosX) * rotationSensitivity;
                     oldDownPosX = event.touches[0].pageX;
 
                     TweenMax.killTweensOf(totalRoot);
@@ -1167,7 +1168,7 @@ function onDocumentTouchMove(event) {
                 else {
                     if (isFixed) {
                         if (logoCrystalIdx != 0) {
-                            let y = (event.touches[0].pageX - oldDownPosX) * 0.05;
+                            let y = (event.touches[0].pageX - oldDownPosX) * rotationSensitivity;
                             oldDownPosX = event.touches[0].pageX;
 
                             TweenMax.killTweensOf(totalRoot);
@@ -1181,7 +1182,7 @@ function onDocumentTouchMove(event) {
                         }
                     }
                     else {
-                        let y = (event.touches[0].pageX - oldDownPosX) * 0.05;
+                        let y = (event.touches[0].pageX - oldDownPosX) * rotationSensitivity;
                         oldDownPosX = event.touches[0].pageX;
 
                         TweenMax.killTweensOf(totalRoot);
@@ -1263,7 +1264,7 @@ function partial2CrystalUpdate(time, texture, pos) {
             partial2Crystals[i].material.uniforms.alphaValue.value = alphaTimer.val;
             partial2Crystals[i].material.uniforms.lightPosition.value = pos;
             partial2Crystals[i].material.uniforms.matrixWorldInverse.value = partial2Crystals[i].matrixWorld.getInverse(partial2Crystals[i].matrixWorld)
-            partial2Crystals[i].material.uniforms["animationParam1"].value = gatherParam.value;
+            partial2Crystals[i].material.uniforms["animationParam1"].value = 1;
             partial2Crystals[i].material.uniforms["animationParam2"].value = brightnessValue.value;
             partial2Crystals[i].material.uniforms.lightValueParam.value = lightValueParam.value;
             partial2Crystals[i].material.uniforms.radius = 0;// distanceVector(partial2Crystals[i].position, new THREE.Vector3(0, 0, 0));
@@ -1423,12 +1424,6 @@ function render() {
                         let rx = symbolX * ua * Math.cos(alpha);
                         let rz = symbolY * ua * Math.sin(alpha);
                         let ry = 0;
-                        // partialCrystalRoots[idx].rotation.set(0, beta, 0);
-
-                        // let rx = initPositionOfPartialCrystals[idx].x * 0.3;
-                        // let ry = initPositionOfPartialCrystals[idx].y * 0.3;
-                        // let rz = initPositionOfPartialCrystals[idx].z * 0.3;
-
 
                         let sx = initScaleOfPartialCrystals[idx].x * 0.7;
                         let sy = initScaleOfPartialCrystals[idx].y * 0.7;
@@ -1520,18 +1515,21 @@ function render() {
                 partialCrystals.forEach(partCrystal => {
                     //Gathering Crystal to Zero point
                     TweenMax.killTweensOf(partCrystal);
-                    TweenMax.to(partCrystal.position, 0.7, {
+                    TweenMax.to(partCrystal.position, 1, {
                         ease: Sine.easeInOut,
                         x: 0,
                         y: 0,
                         z: 0,
                         onComplete() {
+                            partialCrystals.forEach(partCrystal => {
+                                partCrystal.visible = false;
+                            })
                         },
                         onUpdate() {
                         }
                     });
                 });
-                TweenMax.to(brightnessValue, 0.7, {
+                TweenMax.to(brightnessValue, 1, {
                     ease: Sine.easeInOut,
                     value: 0.1,
                 });
@@ -1556,34 +1554,28 @@ function render() {
                 logoCrystal.rotation.set(0, -Math.PI / 9, 0);
                 totalRoot.rotation.set(0, Math.PI * 3.3 / 5 + Math.PI / 2, 0);
 
-                //Control Logo crystal
-                // TweenMax.killTweensOf(logoCrystal);
-                TweenMax.to(gatherParam, 3, {
-                    ease: Power1.easeInOut,
-                    value: 1
-                });
-
                 let idx = 0;
                 partial2Crystals.forEach(part2Crystal => {
                     part2Crystal.visible = true;
                     TweenMax.killTweensOf(part2Crystal);
-                    TweenMax.to(part2Crystal.position, 1.5, {
-                        ease: Power1.easeInOut,
+                    TweenMax.to(part2Crystal.position, 3, {
+                        ease: Power2.easeOut,
                         x: initPositionOfPartial2Crystals[idx].x,
                         y: initPositionOfPartial2Crystals[idx].y,
-                        z: initPositionOfPartial2Crystals[idx].z,
+                        z: initPositionOfPartial2Crystals[idx].z
                     });
-                    TweenMax.to(part2Crystal.scale, 1.5, {
-                        ease: Power1.easeInOut,
+                    TweenMax.to(part2Crystal.scale, 3, {
+                        ease: Power2.easeOut,
                         x: initScaleOfPartial2Crystals[idx].x,
                         y: initScaleOfPartial2Crystals[idx].y,
-                        z: initScaleOfPartial2Crystals[idx].z,
-                        onComplete() {
-                        },
-                        onUpdate() {
-                        }
+                        z: initScaleOfPartial2Crystals[idx].z
                     });
                     idx++;
+                });
+
+                TweenMax.to(gatherParam, 8, {
+                    ease: Power2.easeOut,
+                    value: 1
                 });
 
                 TweenMax.to(brightnessValue, 2.5, {
@@ -1643,16 +1635,8 @@ function render() {
                 autoCreate = true;
             downTimer = 0;
             accelTimerForRootAngle = 0;
-            scene.remove(partialCrystalParent);
-            for (let i = 0; i < partialCrystalCount; i++) {
-                scene.remove(partialCrystalRoots[i]);
-                scene.remove(partialCrystals[i]);
-                // partialCrystals[i].geometry.dispose();
-                // partialCrystals[i].material.dispose();
-            }
-            partialCrystals.forEach(partCrystal => {
-                partCrystal.visible = false;
-            })
+            
+            
             currentState = State.LogoAround;
             holderContainer.classList.remove("hidden");
             break;
@@ -1693,25 +1677,22 @@ function render() {
                         let sy = 0.01;
                         let sz = 0.01;
                         TweenMax.killTweensOf(part2Crystal);
-                        TweenMax.to(part2Crystal.position, 1.2, {
-                            ease: Sine.easeInOut,
+                        TweenMax.to(part2Crystal.position, 1.1, {
+                            ease: Sine.easeIn,
                             x: rx,
                             y: ry,
-                            z: rz,
-                            delay: 0.5
+                            z: rz
                         });
-                        // TweenMax.to(part2Crystal.scale, 1.9, {
-                        //     ease: Sine.easeInOut,
-                        //     x: sx,
-                        //     y: sy,
-                        //     z: sz,
-                        //     delay: 0.2
-                        // });
+                        TweenMax.to(part2Crystal.scale, 1, {
+                            ease: Sine.easeIn,
+                            x: sx,
+                            y: sy,
+                            z: sz
+                        });
                     });
 
-                    TweenMax.killTweensOf(gatherParam);
-                    TweenMax.to(gatherParam, 1.9, {
-                        ease: Sine.easeInOut,
+                    TweenMax.to(gatherParam, 1, {
+                        ease: Sine.easeIn,
                         value: 0,
                         onComplete() {
                             vibrateValue.value = 0;
@@ -1721,8 +1702,8 @@ function render() {
                     downTimer = 0;
 
                     TweenMax.killTweensOf(brightnessValue);
-                    TweenMax.to(brightnessValue, 1.9, {
-                        ease: Sine.easeInOut,
+                    TweenMax.to(brightnessValue, 1, {
+                        ease: Sine.easeIn,
                         value: 0.1
                     });
 
@@ -1759,10 +1740,10 @@ function render() {
                     partialCrystals.forEach(partCrystal => {
                         TweenMax.killTweensOf(partCrystal);
                         TweenMax.to(partCrystal.position, 1.5, {
+                            ease: Expo.easeOut,
                             x: initPositionOfPartialCrystals[idx].x,
                             y: initPositionOfPartialCrystals[idx].y,
-                            z: initPositionOfPartialCrystals[idx].z,
-                            ease: Expo.easeOut
+                            z: initPositionOfPartialCrystals[idx].z
                         });
                         TweenMax.to(partCrystal.scale, 1.5, {
                             ease: Expo.easeOut,
@@ -1793,32 +1774,20 @@ function render() {
                 partial2Crystals.forEach(part2Crystal => {
                     TweenMax.killTweensOf(part2Crystal);
                     TweenMax.to(part2Crystal.position, 2, {
+                        ease: Expo.easeOut,
                         x: initPositionOfPartial2Crystals[idx].x,
                         y: initPositionOfPartial2Crystals[idx].y,
-                        z: initPositionOfPartial2Crystals[idx].z,
-                        ease: Expo.easeOut
+                        z: initPositionOfPartial2Crystals[idx].z
                     });
                     TweenMax.to(part2Crystal.scale, 2, {
                         ease: Expo.easeOut,
                         x: initScaleOfPartial2Crystals[idx].x,
                         y: initScaleOfPartial2Crystals[idx].y,
-                        z: initScaleOfPartial2Crystals[idx].z,
-                        onComplete() {
-                        },
-                        onUpdate() {
-                        }
+                        z: initScaleOfPartial2Crystals[idx].z
                     });
 
                     idx++;
                 });
-
-                // TweenMax.killTweensOf(logoCrystal);
-                // TweenMax.to(logoCrystal.scale, 2, {
-                //     ease: Expo.easeOut,
-                //     x: 1,
-                //     y: 1,
-                //     z: 1,
-                // });
 
                 TweenMax.to(gatherParam, 2.5, {
                     ease: Expo.easeOut,
