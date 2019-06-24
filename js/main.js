@@ -1,5 +1,5 @@
-var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
-// var assetPath = "Assets/";
+// var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
+var assetPath = "Assets/";
 var container;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
 
