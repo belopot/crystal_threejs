@@ -189,6 +189,7 @@ function init() {
     loadingContainer = document.getElementById('loading');
     loadingPercent = document.getElementById('percent');
     holderContainer = document.getElementById('holder');
+
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Import model
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,12 +203,12 @@ function init() {
         scene = new THREE.Scene();
         // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
-        scene.background = new THREE.Color(0x111f65);
+        // scene.background = new THREE.Color(0x111f65);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -257,10 +258,22 @@ function init() {
     };
 
     manager.onLoad = function () {
-
         // console.log('Loading complete!');
         loadingContainer.classList.add("loaded");
         loaded = true;
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        //Event
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        var canvas = renderer.domElement;
+        canvas.addEventListener('mousedown', onDocumentMouseDown, false);
+        canvas.addEventListener('mousemove', onDocumentMouseMove, false);
+        canvas.addEventListener('mouseup', onDocumentMouseUp, false);
+        canvas.addEventListener('touchstart', onDocumentTouchStart, false);
+        canvas.addEventListener('touchmove', onDocumentTouchMove, false);
+        canvas.addEventListener('touchend', onDocumentTouchEnd, false);
+        canvas.addEventListener('touchcancel', onDocumentTouchCancel, false);
+        window.addEventListener('resize', onWindowResize, false);
 
         startTime = (new Date).getTime();
 
@@ -961,17 +974,7 @@ function init() {
 
     onWindowResize();
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    //Event
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    document.addEventListener('mousedown', onDocumentMouseDown, false);
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
-    document.addEventListener('mouseup', onDocumentMouseUp, false);
-    document.addEventListener('touchstart', onDocumentTouchStart, false);
-    document.addEventListener('touchmove', onDocumentTouchMove, false);
-    document.addEventListener('touchend', onDocumentTouchEnd, false);
-    document.addEventListener('touchcancel', onDocumentTouchCancel, false);
-    window.addEventListener('resize', onWindowResize, false);
+
     window.onscroll = function () {
         if (!loaded)
             window.scrollTo(0, 0);
@@ -980,33 +983,39 @@ function init() {
 
 }
 
-$('.indicator').on({
-    'mousedown': function () {
+$('#holder').on({
+    'mousedown': function (e) {
         pickLogo = true;
+        onDocumentMouseDown(e);
     }
 });
-$('.indicator').on({
-    'mouseup': function () {
+$('#holder').on({
+    'mouseup': function (e) {
         pickLogo = false;
+        onDocumentMouseUp(e);
     }
 });
-$('.indicator').on({
-    'touchstart': function () {
+$('#holder').on({
+    'touchstart': function (e) {
         pickLogo = true;
+        onDocumentTouchStart(e);
     }
 });
-$('.indicator').on({
-    'touchend': function () {
+$('#holder').on({
+    'touchend': function (e) {
         pickLogo = false;
+        onDocumentTouchEnd(e);
     }
 });
-$('.indicator').on({
-    'touchcancel': function () {
+$('#holder').on({
+    'touchcancel': function (e) {
         pickLogo = false;
+        onDocumentTouchCancel(e);
     }
 });
 
 function onDocumentMouseDown(event) {
+
     isMouseDown = true;
     event.preventDefault();
     mouseXOnMouseDown = event.clientX - windowHalfX;
@@ -1396,7 +1405,7 @@ function render() {
                     partialCrystalRoots[i].rotation.z += partialCrystalRootAngleSpeeds[i].z / 3000;
                     accelTimerForRootAngle = 0;
                 }
-                else{
+                else {
                     // accelTimerForRootAngle += isMobile ? 0.000005 : 0.000001;
                     accelTimerForRootAngle += 0.00000129;
                     let a = 0.0001 - accelTimerForRootAngle;
@@ -1652,8 +1661,10 @@ function render() {
             break;
         case State.End:
 
-            if (!autoCreate)
+            if (!autoCreate) {
                 autoCreate = true;
+
+            }
             downTimer = 0;
 
 

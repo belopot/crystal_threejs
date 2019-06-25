@@ -134,7 +134,7 @@ a {
 
 #loading.loaded {
     opacity: 0;
-    visibility: visible;
+    visibility: hidden;
 }
 
 #holder {
@@ -148,7 +148,11 @@ a {
     height: 84px;
     bottom: 56px;
     -webkit-transition: visibility .4s linear, opacity .4s linear;
-    transition: visibility .4s linear, opacity .4s linear
+    transition: visibility .4s linear, opacity .4s linear;
+}
+
+#holder:hover{
+    cursor: pointer;
 }
 
 #holder.hidden {
