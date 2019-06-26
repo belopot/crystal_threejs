@@ -275,6 +275,32 @@ function init() {
         canvas.addEventListener('touchcancel', onDocumentTouchCancel, false);
         window.addEventListener('resize', onWindowResize, false);
 
+        holderContainer.addEventListener('mousedown', function (e) {
+                pickLogo = true;
+                onDocumentMouseDown(e);
+            }
+        );
+        holderContainer.addEventListener('mouseup', function (e) {
+                pickLogo = false;
+                onDocumentMouseUp(e);
+            }
+        );
+        holderContainer.addEventListener('touchstart', function (e) {
+                pickLogo = true;
+                onDocumentTouchStart(e);
+            }
+        );
+        holderContainer.addEventListener('touchend', function (e) {
+                pickLogo = false;
+                onDocumentTouchEnd(e);
+            }
+        );
+        holderContainer.addEventListener('touchcancel', function (e) {
+                pickLogo = false;
+                onDocumentTouchCancel(e);
+            }
+        );
+
         startTime = (new Date).getTime();
 
         //clone partial crystal
@@ -983,36 +1009,7 @@ function init() {
 
 }
 
-$('#holder').on({
-    'mousedown': function (e) {
-        pickLogo = true;
-        onDocumentMouseDown(e);
-    }
-});
-$('#holder').on({
-    'mouseup': function (e) {
-        pickLogo = false;
-        onDocumentMouseUp(e);
-    }
-});
-$('#holder').on({
-    'touchstart': function (e) {
-        pickLogo = true;
-        onDocumentTouchStart(e);
-    }
-});
-$('#holder').on({
-    'touchend': function (e) {
-        pickLogo = false;
-        onDocumentTouchEnd(e);
-    }
-});
-$('#holder').on({
-    'touchcancel': function (e) {
-        pickLogo = false;
-        onDocumentTouchCancel(e);
-    }
-});
+
 
 function onDocumentMouseDown(event) {
 
