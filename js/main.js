@@ -42,7 +42,7 @@ var partialCrystalRootAngleSpeeds = [];
 var initPositionOfPartialCrystals = [];
 var initScaleOfPartialCrystals = [];
 var partialCrystalParent;
-var partialCrystalCount = 116;
+var partialCrystalCount = 136;
 var partialCrystalSize = 3.3;
 
 var partial2Crystals = [];
@@ -51,7 +51,7 @@ var partial2CrystalAngleSpeeds = [];
 var initPositionOfPartial2Crystals = [];
 var initScaleOfPartial2Crystals = [];
 var partial2CrystalParent;
-var partial2CrystalCount = 49;
+var partial2CrystalCount = 42;
 var partial2CrystalSize = 2.3;
 
 var totalRoot;
@@ -276,29 +276,29 @@ function init() {
         window.addEventListener('resize', onWindowResize, false);
 
         holderContainer.addEventListener('mousedown', function (e) {
-                pickLogo = true;
-                onDocumentMouseDown(e);
-            }
+            pickLogo = true;
+            onDocumentMouseDown(e);
+        }
         );
         holderContainer.addEventListener('mouseup', function (e) {
-                pickLogo = false;
-                onDocumentMouseUp(e);
-            }
+            pickLogo = false;
+            onDocumentMouseUp(e);
+        }
         );
         holderContainer.addEventListener('touchstart', function (e) {
-                pickLogo = true;
-                onDocumentTouchStart(e);
-            }
+            pickLogo = true;
+            onDocumentTouchStart(e);
+        }
         );
         holderContainer.addEventListener('touchend', function (e) {
-                pickLogo = false;
-                onDocumentTouchEnd(e);
-            }
+            pickLogo = false;
+            onDocumentTouchEnd(e);
+        }
         );
         holderContainer.addEventListener('touchcancel', function (e) {
-                pickLogo = false;
-                onDocumentTouchCancel(e);
-            }
+            pickLogo = false;
+            onDocumentTouchCancel(e);
+        }
         );
 
         startTime = (new Date).getTime();
@@ -946,6 +946,7 @@ function init() {
                     }
 
                     child.visible = false;
+
                     logoCrystals.push(child);
 
                 }
