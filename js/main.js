@@ -1,6 +1,6 @@
 // var assetPath = "https://office-shimura.jp/wp-content/themes/office-shimura/crystal_threejs/Assets/";
 var assetPath = "Assets/";
-var container;
+var container, canvas;
 var camera, cameraRoot, cubeCamera1, cubeCamera2, scene, renderer, composer, clock;
 
 var sCrystalShader1;
@@ -9,6 +9,7 @@ var sCrystalShader2;
 var lCrystalShader1;
 var lCrystalShader2;
 var lSphereShader;
+var lCircleShader;
 
 var sCrystalAlphaMap;
 var sCrystalSpecularMap;
@@ -28,6 +29,8 @@ var lCrystalBumpMap2;
 var lSphereAlphaMap;
 var lSphereSpecMap;
 var lSphereNorMap;
+
+var lCircleMap;
 
 var raycaster = new THREE.Raycaster();
 var pickMouse = new THREE.Vector2();
@@ -165,6 +168,10 @@ var isFixed = true;
 
 // Sphere for 'S' crystal
 var logoSphere;
+var logoCircle;
+var logoText;
+var logoTextWidth;
+var logoTextHeight;
 
 function getRandomScale(low, high) {
     return getRandom() * (high - low) + low
@@ -224,6 +231,13 @@ function init() {
         renderer.gammaOutput = true;
 
         /////////////////////////////////////////////////////////////////////////////////////////////
+        //Lighter
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        var light = new THREE.PointLight(0xff0000, 1, 500);
+        light.position.set(150, 5, 0);
+        scene.add(light);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
         //Camera
         //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -262,7 +276,7 @@ function init() {
         composer.addPass(effectBloom);
         // composer.addPass(effectFilm);
 
-        isMobile = mobileAndTabletcheck()
+        isMobile = mobileAndTabletcheck();
     };
 
     manager.onLoad = function () {
@@ -273,7 +287,7 @@ function init() {
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Event
         /////////////////////////////////////////////////////////////////////////////////////////////
-        var canvas = renderer.domElement;
+        canvas = renderer.domElement;
         canvas.addEventListener('mousedown', onDocumentMouseDown, false);
         canvas.addEventListener('mousemove', onDocumentMouseMove, false);
         canvas.addEventListener('mouseup', onDocumentMouseUp, false);
@@ -437,13 +451,43 @@ function init() {
 
         //Add logoSphere to s crystal
         //Create logo sphere
-        logoSphere = new THREE.Mesh(
-            new THREE.SphereGeometry(280, 64, 64),
-            lSphereShader
+
+        // logoSphere = new THREE.Mesh(
+        //     new THREE.SphereGeometry(280, 64, 64),
+        //     lSphereShader
+        // );
+
+        // logoCrystals[0].add(logoSphere);
+
+        logoCircle = new THREE.Mesh(
+            new THREE.CircleGeometry(360, 64),
+            lCircleShader
         );
 
-        logoCrystals[0].add(logoSphere);
-        
+
+
+        logoCircle.rotation.set(0, Math.PI / 2, 0);
+        logoCircle.position.set(-150, 0, 0);
+
+        logoCrystals[0].add(logoCircle);
+
+        logoText = document.createElement('div');
+        logoText.className = 'logo-label';
+        logoText.style.position = 'absolute';
+        logoText.style.fontSize = isMobile ? "2em" : "5em";
+
+        logoTextWidth = isMobile ? 300 : 600;
+        logoTextHeight = isMobile ? 60: 120;
+        logoText.style.width = logoTextWidth + "px";
+        logoText.style.height = logoTextHeight + "px";
+        logoText.innerHTML = 'Make It Good<br><p>変革の実行までを共に進める</p>';
+
+
+        logoText.style.top = Math.floor(canvas.offsetHeight / 2 - logoTextHeight / 2) + "px";
+        logoText.style.left = Math.floor(canvas.offsetWidth / 2 - logoTextWidth / 2) + "px";
+        container.appendChild(logoText);
+
+
         //Logo
         logoCrystals.forEach(element => {
             totalRoot.add(element);
@@ -595,6 +639,8 @@ function init() {
     lSphereAlphaMap = textureLoader.load(texturePath + "logo/sphere_a.jpg");
     lSphereSpecMap = textureLoader.load(texturePath + "logo/sphere_s.jpg");
     lSphereNorMap = textureLoader.load(texturePath + "logo/sphere_n.jpg");
+
+    lCircleMap = textureLoader.load(texturePath + "logo/circle_s.jpg");
 
     sCrystalShader1 = new THREE.RawShaderMaterial({
         vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float time;\nuniform float radius;\nuniform float rotationSpeed;\nuniform float animationParam1;\nuniform float animationParam2;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec3 randomValues;\nattribute vec3 offset;\nattribute float instanceIndex;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\nvec3 rotateVec3_3_2(vec3 p, float angle, vec3 axis){\n  vec3 a = normalize(axis);\n  float s = sin(angle);\n  float c = cos(angle);\n  float r = 1.0 - c;\n  mat3 m = mat3(\n    a.x * a.x * r + c,\n    a.y * a.x * r + a.z * s,\n    a.z * a.x * r - a.y * s,\n    a.x * a.y * r - a.z * s,\n    a.y * a.y * r + c,\n    a.z * a.y * r + a.x * s,\n    a.x * a.z * r + a.y * s,\n    a.y * a.z * r - a.x * s,\n    a.z * a.z * r + c\n  );\n  return m * p;\n}\n\n\nfloat exponentialOut_4_3(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.2;\n  return map_2_1(value, r, r + 0.8, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  vec3 n = normal;\n  float groupIndex = mod(instanceIndex, 3.0);\n  if (groupIndex == 2.0) {\n    groupIndex = 1.0;\n  }\n  float r = radius * (1.0 + 0.5 * groupIndex);\n  float s = rotationSpeed * (1.0 + 0.8 * groupIndex);\n\n\n  float theta1 = time * 0.01 / 180.0 * PI_1_0 * randomValues.x + randomValues.y * 100.0;\n  float theta2 = time * 0.01 / 180.0 * PI_1_0 * randomValues.z + randomValues.x * 100.0;\n  float theta3 = -time * s / 180.0 * PI_1_0 * randomValues.y + randomValues.z * 100.0;\n\n  vec3 axisX = vec3(1.0, 0.0, 0.0);\n  vec3 axisY = vec3(0.0, 1.0, 0.0);\n  vec3 axisZ = vec3(0.0, 0.0, 1.0);\n\n  pos = rotateVec3_3_2(pos, theta1, axisX);\n  n = rotateVec3_3_2(n, theta1, axisX);\n  pos = rotateVec3_3_2(pos, theta2, axisZ);\n  n = rotateVec3_3_2(n, theta2, axisZ);\n\n  float p1 = exponentialOut_4_3(getAnimationParam(animationParam1, randomValues.x));\n  pos *= p1;\n\n  pos.x += (r + offset.x) * p1;\n  pos.y += (offset.y * p1);\n  pos = rotateVec3_3_2(pos, theta3, axisY);\n  n = rotateVec3_3_2(n, theta3, axisY);\n\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(n, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  vLightValue = 0.0;\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
@@ -919,7 +965,7 @@ function init() {
             },
             envMapIntensity: {
                 type: "1f",
-                value: 0.1
+                value: 0
             },
             normalMap: {
                 type: "t",
@@ -944,6 +990,78 @@ function init() {
             lightPosition: {
                 type: "3f",
                 value: [0, 0, 0]
+            },
+            bumpRefraction: {
+                type: "1f",
+                value: 1
+            },
+            alphaValue: {
+                type: "1f",
+                value: .4
+            },
+            animationParam1: {
+                type: "1f",
+                value: 0
+            },
+            animationParam2: {
+                type: "1f",
+                value: 0
+            },
+            animationParam3: {
+                type: "1f",
+                value: 0
+            },
+            lightValueParam: {
+                type: "1f",
+                value: 1
+            }
+        }
+    });
+
+    lCircleShader = new THREE.RawShaderMaterial({
+        vertexShader: "#define GLSLIFY 1\nuniform mat4 viewMatrix;\nuniform mat4 modelMatrix;\nuniform mat4 projectionMatrix;\nuniform vec3 cameraPosition;\nuniform float animationParam1;\nuniform float animationParam2;\nuniform float animationParam3;\nuniform float time;\nuniform float lightValueParam;\n\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute float vertexRandomValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nconst float PI_1_0 = 3.1415926535897932384626433832795;\n\n\nfloat map_2_1(float value, float inputMin, float inputMax, float outputMin, float outputMax, bool clamp) {\n  if(clamp == true) {\n    if(value < inputMin) return outputMin;\n    if(value > inputMax) return outputMax;\n  }\n\n  float p = (outputMax - outputMin) / (inputMax - inputMin);\n  return ((value - inputMin) * p) + outputMin;\n}\n\n\n// #pragma glslify: snoise3 = require('glsl-noise/simplex/3d')\nfloat exponentialOut_3_2(float t) {\n  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);\n}\n\n\n\n#ifndef PI\n#define PI 3.141592653589793\n#endif\n\nfloat backOut_4_3(float t) {\n  float f = 1.0 - t;\n  return 1.0 - (pow(f, 3.0) - f * sin(f * PI));\n}\n\n\n\n\n\nfloat getAnimationParam(float value, float randomValue) {\n  float r = randomValue * 0.4;\n  return map_2_1(value, r, r + 0.6, 0.0, 1.0, true);\n}\n\nvoid main() {\n  vec3 pos = position;\n  pos *= exponentialOut_3_2(getAnimationParam(animationParam1, vertexRandomValue));\n  vec4 modelPos = modelMatrix * vec4(pos, 1.0);\n  float t = mod(time, 20000.0 * PI_1_0);\n  modelPos.x += animationParam3 * 0.1 * sin(t * 200.0);\n  modelPos.y += animationParam3 * 0.1 * sin(t * 400.0);\n  modelPos.z += animationParam3 * 0.1 * sin(t * 600.0);\n\n  vPos = modelPos.xyz;\n  vNormal = (modelMatrix * vec4(normal, 0.0)).xyz;\n  vUv = uv;\n  vCameraPos = cameraPosition;\n  vTangent = cross(vNormal, vec3(0.0, 1.0, 0.0));\n  vColor = vec4(vec3(6.0), 1.0);\n  vColorAnimationParam = (1.0 - animationParam2);\n  float len = length(position.xyz);\n  vLightValue = min(lightValueParam / len / len * (0.6 + vertexRandomValue * 0.4), 0.6);\n\n  gl_Position = projectionMatrix * viewMatrix * modelPos;\n}\n",
+        fragmentShader: "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#define GLSLIFY 1\n#endif\n\nuniform samplerCube envMap;\nuniform sampler2D alphaMap;\nuniform sampler2D bumpMap;\nuniform sampler2D specularMap;\nuniform sampler2D normalMap;\nuniform float bumpRefraction;\n\nuniform mat4 matrixWorldInverse;\nuniform float refractionRatio;\nuniform vec3 lightPosition;\nuniform float alphaValue;\n\nvarying vec3 vPos;\nvarying vec3 vNormal;\nvarying vec2 vUv;\nvarying vec3 vCameraPos;\nvarying vec3 vTangent;\nvarying vec4 vColor;\nvarying float vColorAnimationParam;\nvarying float vLightValue;\n\nvoid main(){\n  vec3 tBinormal = cross(vNormal, vTangent);\n  mat3 mView = mat3(vTangent, tBinormal, vNormal);\n\n  vec3 normal = mView * (normalize(texture2D(normalMap, vUv)) * 2.0 - 1.0).rgb;\n  vec4 specular = texture2D(specularMap, vUv);\n  specular.rgb *= 0.4;\n\n  vec3 invLight = normalize(matrixWorldInverse * vec4(lightPosition, 0.0)).xyz;\n  vec4 diffuse  = vec4(vec3(clamp(dot(normal, invLight), 0.1, 1.0)) * 3.0, 1.0);\n  vec4 bump = texture2D(bumpMap, vUv);\n\n  float alpha = texture2D(alphaMap, vUv).r;\n\n  float b = refractionRatio;\n  if(bumpRefraction == 1.0) {\n    b *= bump.g * 0.4;\n  }\n  vec3 ref = refract(normalize(vPos - vCameraPos), normal, b);\n  vec4 envColor = textureCube(envMap, ref);\n\n  vec4 destColor = diffuse * envColor * vColor;\n  destColor.a = alpha / alphaValue + alpha * vColorAnimationParam + vLightValue;\n  destColor.rgb += vColorAnimationParam + vLightValue;\n  gl_FragColor = destColor;\n}\n",
+        transparent: true,
+        uniforms: {
+            alphaMap: {
+                type: "t",
+                value: lCircleMap
+            },
+            bumpMap: {
+                type: "t",
+                value: null
+            },
+            envMap: {
+                type: "t",
+                value: envMap
+            },
+            envMapIntensity: {
+                type: "1f",
+                value: 0.1
+            },
+            normalMap: {
+                type: "t",
+                value: lCircleMap
+            },
+            specularMap: {
+                type: "t",
+                value: lCircleMap
+            },
+            time: {
+                type: "1f",
+                value: null
+            },
+            refractionRatio: {
+                type: "1f",
+                value: 0.0
+            },
+            matrixWorldInverse: {
+                type: "m4",
+                value: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            },
+            lightPosition: {
+                type: "3f",
+                value: [0, -1000, 0]
             },
             bumpRefraction: {
                 type: "1f",
@@ -1106,7 +1224,6 @@ function init() {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
 }
-
 
 
 function onDocumentMouseDown(event) {
@@ -1346,6 +1463,11 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     composer.reset();
+
+    if (canvas) {
+        logoText.style.top = Math.floor(canvas.offsetHeight / 2 - logoTextHeight / 2) + "px";
+        logoText.style.left = Math.floor(canvas.offsetWidth / 2 - logoTextWidth / 2) + "px";
+    }
 }
 
 function animate() {
@@ -1414,6 +1536,19 @@ function logoSphereUpdate(time, texture, pos) {
         logoSphere.material.uniforms["animationParam2"].value = 1;
         logoSphere.material.uniforms["animationParam3"].value = vibrateValue.value;
         logoSphere.material.uniforms.lightValueParam.value = 1;
+    }
+
+    if (logoCircle) {
+        logoCircle.material.uniforms.time.value = time;
+        // logoCircle.material.uniforms.envMap.value = texture;
+        logoCircle.material.uniforms.alphaValue.value = 1;
+        logoCircle.material.uniforms.lightPosition.value = pos;
+        logoCircle.material.uniforms.matrixWorldInverse.value = logoCircle.matrixWorld.getInverse(logoCircle.matrixWorld);
+        logoCircle.material.uniforms["animationParam1"].value = gatherParam.value;
+        logoCircle.material.uniforms["animationParam2"].value = 0.6;
+        logoCircle.material.uniforms["animationParam3"].value = vibrateValue.value;
+        logoCircle.material.uniforms.lightValueParam.value = 5;
+        // logoCircle.material.needsUpdate = false;
     }
 }
 
@@ -1762,6 +1897,7 @@ function render() {
                     ease: Power1.easeInOut,
                     opacity: 0,
                     onComplete() {
+                        logoText.style.visibility = "visible";
                     }
                 });
 
@@ -1865,7 +2001,7 @@ function render() {
                         logoCrystalIdx = 0;
                     }
                     holderContainer.classList.add("hidden");
-
+                    logoText.style.visibility = "hidden";
                     currentState = State.Partial;
                     pickLogo = false;
                     isMouseDown = false;
