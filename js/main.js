@@ -218,12 +218,12 @@ function init() {
         scene = new THREE.Scene();
         // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
-        // scene.background = new THREE.Color(0x111f65);
+        scene.background = new THREE.Color(0x111f65);
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         // renderer.autoClear = false;
@@ -1541,13 +1541,13 @@ function logoSphereUpdate(time, texture, pos) {
     if (logoCircle) {
         logoCircle.material.uniforms.time.value = time;
         // logoCircle.material.uniforms.envMap.value = texture;
-        logoCircle.material.uniforms.alphaValue.value = 1;
+        logoCircle.material.uniforms.alphaValue.value = 5;
         logoCircle.material.uniforms.lightPosition.value = pos;
         logoCircle.material.uniforms.matrixWorldInverse.value = logoCircle.matrixWorld.getInverse(logoCircle.matrixWorld);
         logoCircle.material.uniforms["animationParam1"].value = gatherParam.value;
-        logoCircle.material.uniforms["animationParam2"].value = 0.6;
+        logoCircle.material.uniforms["animationParam2"].value = 0.8;
         logoCircle.material.uniforms["animationParam3"].value = vibrateValue.value;
-        logoCircle.material.uniforms.lightValueParam.value = 5;
+        logoCircle.material.uniforms.lightValueParam.value = 2000;
         // logoCircle.material.needsUpdate = false;
     }
 }
