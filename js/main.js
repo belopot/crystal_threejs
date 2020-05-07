@@ -218,7 +218,9 @@ function init() {
         scene = new THREE.Scene();
         // scene.background = new THREE.Color(0x000b1b);
         // scene.background = new THREE.Color(0x0505ff);
-        scene.background = new THREE.Color(0x111f65);
+        // scene.background = new THREE.Color(0x111f65);
+        scene.background = new THREE.Color(0x151521);
+        
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
@@ -226,7 +228,7 @@ function init() {
         renderer = new THREE.WebGLRenderer({ antialias: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
-        // renderer.autoClear = false;
+        renderer.autoClear = false;
         renderer.gammaInput = true;
         renderer.gammaOutput = true;
 
@@ -480,7 +482,7 @@ function init() {
         logoTextHeight = isMobile ? 60: 120;
         logoText.style.width = logoTextWidth + "px";
         logoText.style.height = logoTextHeight + "px";
-        logoText.innerHTML = 'Make It Good<br><p>変革の実行までを共に進める</p>';
+        logoText.innerHTML = 'Make It Good<br><p>Interactive homepage</p>';
 
 
         logoText.style.top = Math.floor(canvas.offsetHeight / 2 - logoTextHeight / 2) + "px";
