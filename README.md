@@ -1,5 +1,6 @@
 # interactive crystal
 
+![Bagel](https://github.com/belopot/crystal_threejs/blob/master/screenshots/0.gif)
 ![Bagel](https://github.com/belopot/crystal_threejs/blob/master/screenshots/1.JPG)
 ![Bagel](https://github.com/belopot/crystal_threejs/blob/master/screenshots/2.JPG)
 ![Bagel](https://github.com/belopot/crystal_threejs/blob/master/screenshots/3.JPG)
