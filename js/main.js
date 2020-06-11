@@ -220,12 +220,12 @@ function init() {
         // scene.background = new THREE.Color(0x0505ff);
         // scene.background = new THREE.Color(0x111f65);
         scene.background = new THREE.Color(0x151521);
-        
+
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         //Renderer
         //////////////////////////////////////////////////////////////////////////////////////////////
-        renderer = new THREE.WebGLRenderer({ antialias: true});
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
         renderer.autoClear = false;
@@ -479,10 +479,10 @@ function init() {
         logoText.style.fontSize = isMobile ? "2em" : "5em";
 
         logoTextWidth = isMobile ? 300 : 600;
-        logoTextHeight = isMobile ? 60: 120;
+        logoTextHeight = isMobile ? 60 : 120;
         logoText.style.width = logoTextWidth + "px";
         logoText.style.height = logoTextHeight + "px";
-        logoText.innerHTML = 'Make It Good<br><p>Interactive homepage</p>';
+        logoText.innerHTML = 'Make It Good<br><p>Interactive 3D Website</p>';
 
 
         logoText.style.top = Math.floor(canvas.offsetHeight / 2 - logoTextHeight / 2) + "px";
